@@ -9,7 +9,7 @@ blueprint:
       description: Wähle das Fahrzeug-Device aus. Alle Sensoren werden automatisch ermittelt.
       selector:
         device:
-          integration: tesla_ble
+          integration: esphome
 
     mqtt_prefix:
       name: MQTT Topic Prefix
