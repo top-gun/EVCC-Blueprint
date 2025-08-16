@@ -1,14 +1,14 @@
 blueprint:
-  name: Tesla EVCC MQTT Status
+  name: Tesla EVCC MQTT Status (ESPHome, Entity-Selector)
   description: >
     Sendet SOC, SOC-Limit, Reichweite und Ladezustand eines Tesla-Fahrzeugs per MQTT.
-    Nutzer wählt die Charging-State-Entität aus. Alle anderen Entitäten werden automatisch abgeleitet.
+    Nutzer wählt nur die Haupt-Entität (z. B. Charge-Level) aus. Andere Entitäten werden automatisch abgeleitet.
   domain: automation
 
   input:
     main_entity:
-      name: Tesla Charging State Sensor
-      description: Wähle die Entität mit dem Ladestatus (z. B. sensor.tesla_ble_xxx_charging_state)
+      name: Haupt-Entität des Fahrzeugs
+      description: Wähle die Charge-Level-Entität des Fahrzeugs. Alle anderen Sensoren werden automatisch abgeleitet.
       selector:
         device:
     mqtt_prefix:
@@ -24,48 +24,34 @@ trigger:
 
 action:
   - variables:
-      prefix: >-
-        {{ main_entity.rsplit('_', 1)[0] }}
+      # Präfix aus der Haupt-Entität ableiten
+      prefix: "{{ main_entity.rsplit('_', 1)[0] }}"
 
-      soc_sensor: >-
-        {{ prefix + '_charge_level' }}
-      soc_limit_sensor: >-
-        {{ prefix + '_charge_limit' }}
-      range_sensor: >-
-        {{ prefix + '_range' }}
-      charge_state_sensor: >-
-        {{ main_entity }}
+      # Alle relevanten Sensoren
+      soc_sensor: "{{ prefix + '_charge_level' }}"
+      soc_limit_sensor: "{{ prefix + '_charge_limit' }}"
+      range_sensor: "{{ prefix + '_range' }}"
+      charge_state_sensor: "{{ prefix + '_charging_state' }}"
 
-  - service: mqtt.publish
-    data:
-      topic: "{{ mqtt_prefix }}/tesla-soc"
-      payload: "{{ states(soc_sensor)|float if states(soc_sensor) else 0 }}"
-      qos: 0
-      retain: false
-
-  - service: mqtt.publish
-    data:
-      topic: "{{ mqtt_prefix }}/tesla-soc-limit"
-      payload: "{{ states(soc_limit_sensor)|int if states(soc_limit_sensor) else 0 }}"
-      qos: 0
-      retain: false
-
-  - service: mqtt.publish
-    data:
-      topic: "{{ mqtt_prefix }}/tesla-range"
-      payload: "{{ states(range_sensor)|int if states(range_sensor) else 0 }}"
-      qos: 0
-      retain: false
-
-  - service: mqtt.publish
-    data:
-      topic: "{{ mqtt_prefix }}/tesla-charge-status"
-      payload: >-
-        {{
+      # MQTT Werte vorbereiten
+      values:
+        "{{ mqtt_prefix }}/tesla-soc": "{{ states(soc_sensor)|float if states(soc_sensor) else 0 }}"
+        "{{ mqtt_prefix }}/tesla-soc-limit": "{{ states(soc_limit_sensor)|int if states(soc_limit_sensor) else 0 }}"
+        "{{ mqtt_prefix }}/tesla-range": "{{ states(range_sensor)|int if states(range_sensor) else 0 }}"
+        "{{ mqtt_prefix }}/tesla-charge-status": >-
+          {{
           {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","Complete":"d","Error":"f"}[states(charge_state_sensor)]
           if states(charge_state_sensor) else "a"
-        }}
-      qos: 0
-      retain: false
+          }}
+
+  - repeat:
+      for_each: "{{ values | dict2items }}"
+      sequence:
+        - service: mqtt.publish
+          data:
+            topic: "{{ repeat.item.key }}"
+            payload: "{{ repeat.item.value }}"
+            qos: 0
+            retain: false
 
 mode: single
