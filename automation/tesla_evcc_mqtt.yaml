@@ -7,13 +7,13 @@ blueprint:
 
   input:
     main_entity:
-      name: Haupt-Entität des Fahrzeugs
-      description: Wähle den Sensor (z. B. Charging State) oder Schalter (Charger). Alle anderen Sensoren werden automatisch abgeleitet.
+      name: Tesla Charging State Sensor
+      description: Wähle die Entität mit dem Ladestatus (z. B. "..._charging_state")
       selector:
         entity:
           domain: sensor
           filter:
-            name: ".*Charging State$"   # Filter auf Endung
+            name: ".*Charging State$"
     mqtt_prefix:
       name: MQTT Topic Prefix
       description: Basis-Topic für alle Statusmeldungen
