@@ -8,8 +8,10 @@ blueprint:
       name: Tesla Fahrzeug (ESPHome)
       description: Wähle das ESPHome-Fahrzeug-Device aus. Alle Sensoren werden automatisch ermittelt.
       selector:
-        device:
+        entity:
           integration: esphome
+          domain: sensor
+          
 
     mqtt_prefix:
       name: MQTT Topic Prefix
