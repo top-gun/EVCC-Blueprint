@@ -28,24 +28,38 @@ trigger:
 action:
   - variables:
       # Präfix aus der Haupt-Entität ableiten
-      prefix: "{{ main_entity.rsplit('_', 1)[0] }}"
+      prefix: >-
+        {{ main_entity.rsplit('_', 1)[0] }}
 
       # Alle relevanten Sensoren
-      soc_sensor: "{{ prefix + '_charge_level' }}"
-      soc_limit_sensor: "{{ prefix + '_charge_limit' }}"
-      range_sensor: "{{ prefix + '_range' }}"
-      charge_state_sensor: "{{ main_entity }}"  # Haupt-Entität selbst
+      soc_sensor: >-
+        {{ prefix + '_charge_level' }}
+      soc_limit_sensor: >-
+        {{ prefix + '_charge_limit' }}
+      range_sensor: >-
+        {{ prefix + '_range' }}
+      charge_state_sensor: >-
+        {{ main_entity }}
 
       # MQTT Werte vorbereiten
-      values:
-        "{{ mqtt_prefix }}/tesla-soc": "{{ states(soc_sensor)|float if states(soc_sensor) else 0 }}"
-        "{{ mqtt_prefix }}/tesla-soc-limit": "{{ states(soc_limit_sensor)|int if states(soc_limit_sensor) else 0 }}"
-        "{{ mqtt_prefix }}/tesla-range": "{{ states(range_sensor)|int if states(range_sensor) else 0 }}"
-        "{{ mqtt_prefix }}/tesla-charge-status": >-
-          {{
-          {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","Complete":"d","Error":"f"}[states(charge_state_sensor)]
-          if states(charge_state_sensor) else "a"
-          }}
+      values: >-
+        {{
+          {
+            (mqtt_prefix ~ '/tesla-soc'): (states(soc_sensor)|float if states(soc_sensor) else 0),
+            (mqtt_prefix ~ '/tesla-soc-limit'): (states(soc_limit_sensor)|int if states(soc_limit_sensor) else 0),
+            (mqtt_prefix ~ '/tesla-range'): (states(range_sensor)|int if states(range_sensor) else 0),
+            (mqtt_prefix ~ '/tesla-charge-status'): (
+              {
+                "Disconnected":"a",
+                "Ready":"b",
+                "Charging":"c",
+                "Stopped":"d",
+                "Complete":"d",
+                "Error":"f"
+              }[states(charge_state_sensor)] if states(charge_state_sensor) else "a"
+            )
+          }
+        }}
 
   - repeat:
       for_each: "{{ values | dict2items }}"
