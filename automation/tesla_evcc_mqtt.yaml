@@ -1,53 +1,99 @@
 blueprint:
-  name: EVCC – Tesla Status an MQTT senden
-  description: Sendet die relevanten Tesla-BLE-Sensordaten regelmäßig per MQTT.
+  name: Tesla BLE MQTT Publisher
+  description: Publishes Tesla BLE sensor states to MQTT topics every 10 seconds.
   domain: automation
   input:
-    tesla_device:
-      name: Tesla BLE Gerät
-      description: Wähle dein Tesla BLE-Gerät aus.
+    charge_level_sensor:
+      name: Tesla Charge Level Sensor
+      description: Select the sensor for the Tesla battery state of charge (SOC).
       selector:
-        device:
-    mqtt_prefix:
-      name: MQTT Topic-Pfad
-      description: Basis-Pfad für die MQTT Topics (ohne abschließenden /).
-      default: ha-evcc/1
+        entity:
+          domain: sensor
+          integration: tesla_ble
+    charge_limit_sensor:
+      name: Tesla Charge Limit Sensor
+      description: Select the sensor for the Tesla charge limit.
       selector:
-        text:
-
-alias: EVCC-Sende-Tesla-Status
-mode: single
+        entity:
+          domain: sensor
+          integration: tesla_ble
+    range_sensor:
+      name: Tesla Range Sensor
+      description: Select the sensor for the Tesla range.
+      selector:
+        entity:
+          domain: sensor
+          integration: tesla_ble
+    charging_state_sensor:
+      name: Tesla Charging State Sensor
+      description: Select the sensor for the Tesla charging state.
+      selector:
+        entity:
+          domain: sensor
+          integration: tesla_ble
+    odometer_sensor:
+      name: Tesla Odometer Sensor
+      description: Select the sensor for the Tesla odometer.
+      selector:
+        entity:
+          domain: sensor
+          integration: tesla_ble
+  source_url: https://example.com/tesla_ble_mqtt_publish.yaml
 trigger:
   - platform: time_pattern
-    seconds: "/10"
-
+    seconds: /10
+condition: []
 action:
-  - service: mqtt.publish
+  - alias: MQTT publish Tesla Battery SOC
+    action: mqtt.publish
     data:
-      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-soc"
-      payload: "{{ states(device_entities(tesla_device) | select('search','_charge_level') | list | first) | float }}"
-
-  - service: mqtt.publish
+      qos: 0
+      retain: false
+      topic: ha-pv/1/tesla-soc
+      payload: "{{ states(!input charge_level_sensor)|float }}"
+    metadata: {}
+  - alias: MQTT publish Tesla charge limit
+    action: mqtt.publish
     data:
-      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-soc-limit"
-      payload: "{{ states(device_entities(tesla_device) | select('search','_charge_limit') | list | first) | int }}"
-
-  - service: mqtt.publish
+      qos: 0
+      retain: false
+      topic: ha-pv/1/tesla-soc-limit
+      payload: "{{ states(!input charge_limit_sensor)|int }}"
+    metadata: {}
+  - alias: MQTT publish Tesla range
+    action: mqtt.publish
     data:
-      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-range"
-      payload: "{{ states(device_entities(tesla_device) | select('search','_range') | list | first) | int }}"
-
-  - service: mqtt.publish
+      qos: 0
+      retain: false
+      topic: ha-pv/1/tesla-range
+      payload: "{{ states(!input range_sensor)|int }}"
+    metadata: {}
+  - alias: MQTT publish Tesla charge status
+    action: mqtt.publish
     data:
-      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-charge-status"
+      qos: 0
+      retain: false
+      topic: ha-pv/1/tesla-charge-status
       payload: >-
         {{
-          {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","Complete":"b","Error":"f"}[
-            states(device_entities(tesla_device) | select('search','_charging_state') | list | first)
-          ]
+        {"disconnected":"a","ready":"b","charging":"c","stopped":"d","complete":"b","error":"f"}[states(!input charging_state_sensor)|lower]
         }}
-
-  - service: mqtt.publish
+    metadata: {}
+    enabled: true
+  - alias: MQTT publish Tesla odometer
+    action: mqtt.publish
     data:
-      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-odometer"
-      payload: "{{ states(device_entities(tesla_device) | select('search','_odometer') | list | first) | int }}"
+      qos: 0
+      retain: false
+      topic: ha-pv/1/tesla-odometer
+      payload: "{{ states(!input odometer_sensor)|int }}"
+    metadata: {}
+  - alias: MQTT publish Tesla finish time
+    action: mqtt.publish
+    data:
+      qos: 1
+      retain: false
+      topic: ha-pv/1/tesla-finishtime
+      payload: "{{ states('sensor.evcc_wallbox_current_request') }}"
+    metadata: {}
+mode: single
