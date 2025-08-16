@@ -3,42 +3,11 @@ blueprint:
   description: Publishes Tesla BLE sensor states to MQTT topics every 10 seconds.
   domain: automation
   input:
-    charge_level_sensor:
-      name: Tesla Charge Level Sensor
-      description: Select the sensor for the Tesla battery state of charge (SOC).
+    tesla_device:
+      name: Tesla BLE Device
+      description: Select the Tesla BLE device to monitor.
       selector:
-        entity:
-          domain: sensor
-          integration: tesla_ble
-    charge_limit_sensor:
-      name: Tesla Charge Limit Sensor
-      description: Select the sensor for the Tesla charge limit.
-      selector:
-        entity:
-          domain: sensor
-          integration: tesla_ble
-    range_sensor:
-      name: Tesla Range Sensor
-      description: Select the sensor for the Tesla range.
-      selector:
-        entity:
-          domain: sensor
-          integration: tesla_ble
-    charging_state_sensor:
-      name: Tesla Charging State Sensor
-      description: Select the sensor for the Tesla charging state.
-      selector:
-        entity:
-          domain: sensor
-          integration: tesla_ble
-    odometer_sensor:
-      name: Tesla Odometer Sensor
-      description: Select the sensor for the Tesla odometer.
-      selector:
-        entity:
-          domain: sensor
-          integration: tesla_ble
-  source_url: https://example.com/tesla_ble_mqtt_publish.yaml
+        device:
 trigger:
   - platform: time_pattern
     seconds: /10
@@ -50,7 +19,7 @@ action:
       qos: 0
       retain: false
       topic: ha-pv/1/tesla-soc
-      payload: "{{ states(!input charge_level_sensor)|float }}"
+      payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
     metadata: {}
   - alias: MQTT publish Tesla charge limit
     action: mqtt.publish
@@ -58,7 +27,7 @@ action:
       qos: 0
       retain: false
       topic: ha-pv/1/tesla-soc-limit
-      payload: "{{ states(!input charge_limit_sensor)|int }}"
+      payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_limit$') | first)|int }}"
     metadata: {}
   - alias: MQTT publish Tesla range
     action: mqtt.publish
@@ -66,7 +35,7 @@ action:
       qos: 0
       retain: false
       topic: ha-pv/1/tesla-range
-      payload: "{{ states(!input range_sensor)|int }}"
+      payload: "{{ states(device_entities(device_id) | select('match', '.*_range$') | first)|int }}"
     metadata: {}
   - alias: MQTT publish Tesla charge status
     action: mqtt.publish
@@ -76,7 +45,7 @@ action:
       topic: ha-pv/1/tesla-charge-status
       payload: >-
         {{
-        {"disconnected":"a","ready":"b","charging":"c","stopped":"d","complete":"b","error":"f"}[states(!input charging_state_sensor)|lower]
+        {"disconnected":"a","ready":"b","charging":"c","stopped":"d","complete":"b","error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)|lower]
         }}
     metadata: {}
     enabled: true
@@ -86,7 +55,7 @@ action:
       qos: 0
       retain: false
       topic: ha-pv/1/tesla-odometer
-      payload: "{{ states(!input odometer_sensor)|int }}"
+      payload: "{{ states(device_entities(device_id) | select('match', '.*_odometer$') | first)|int }}"
     metadata: {}
   - alias: MQTT publish Tesla finish time
     action: mqtt.publish
@@ -96,4 +65,6 @@ action:
       topic: ha-pv/1/tesla-finishtime
       payload: "{{ states('sensor.evcc_wallbox_current_request') }}"
     metadata: {}
+variables:
+  device_id: !input tesla_device
 mode: single
