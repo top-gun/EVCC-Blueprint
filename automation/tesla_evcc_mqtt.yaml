@@ -9,9 +9,9 @@ blueprint:
       description: Wähle das ESPHome-Fahrzeug-Device aus. Alle Sensoren werden automatisch ermittelt.
       selector:
         entity:
-          domain: sensor
+          domain: switch
           filter:
-            name: ".*Charging*"
+            name: ".*Charger*"
 
           
 
