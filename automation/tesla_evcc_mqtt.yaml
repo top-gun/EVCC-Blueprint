@@ -8,9 +8,15 @@ blueprint:
       description: Wähle dein Tesla BLE-Gerät aus.
       selector:
         device:
+    mqtt_prefix:
+      name: MQTT Topic-Pfad
+      description: Basis-Pfad für die MQTT Topics (ohne abschließenden /).
+      default: ha-pv/1
+      selector:
+        text:
 
 alias: EVCC-Sende-Tesla-Status
-description: ""
+mode: single
 trigger:
   - platform: time_pattern
     seconds: "/10"
@@ -18,22 +24,22 @@ trigger:
 action:
   - service: mqtt.publish
     data:
-      topic: ha-pv/1/tesla-soc
+      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-soc"
       payload: "{{ states(device_entities(tesla_device) | select('search','_charge_level') | list | first) | float }}"
 
   - service: mqtt.publish
     data:
-      topic: ha-pv/1/tesla-soc-limit
+      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-soc-limit"
       payload: "{{ states(device_entities(tesla_device) | select('search','_charge_limit') | list | first) | int }}"
 
   - service: mqtt.publish
     data:
-      topic: ha-pv/1/tesla-range
+      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-range"
       payload: "{{ states(device_entities(tesla_device) | select('search','_range') | list | first) | int }}"
 
   - service: mqtt.publish
     data:
-      topic: ha-pv/1/tesla-charge-status
+      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-charge-status"
       payload: >-
         {{
           {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","Complete":"b","Error":"f"}[
@@ -43,5 +49,5 @@ action:
 
   - service: mqtt.publish
     data:
-      topic: ha-pv/1/tesla-odometer
+      topic: "{{ iif(mqtt_prefix != '', mqtt_prefix, 'ha-pv/1') }}/tesla-odometer"
       payload: "{{ states(device_entities(tesla_device) | select('search','_odometer') | list | first) | int }}"
