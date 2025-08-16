@@ -11,7 +11,7 @@ blueprint:
         entity:
           domain: sensor
           filter:
-            name: ".*Charging$"
+            name: ".*Charging*"
 
           
 
