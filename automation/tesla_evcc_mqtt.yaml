@@ -10,8 +10,7 @@ blueprint:
       name: Tesla Charging State Sensor
       description: Wähle die Entität mit dem Ladestatus (z. B. sensor.tesla_ble_xxx_charging_state)
       selector:
-        entity:
-          domain: sensor
+        device:
     mqtt_prefix:
       name: MQTT Topic Prefix
       description: Basis-Topic für alle Statusmeldungen
