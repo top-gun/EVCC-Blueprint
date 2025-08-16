@@ -8,9 +8,6 @@ blueprint:
       description: Wähle dein Tesla BLE-Gerät aus.
       selector:
         device:
-          integration: ble_monitor   # oder die Integration, die dein Tesla-BLE-Sensor liefert
-          entity:
-            domain: sensor
 
 alias: EVCC-Sende-Tesla-Status
 description: ""
