@@ -9,8 +9,10 @@ blueprint:
       description: Wähle das ESPHome-Fahrzeug-Device aus. Alle Sensoren werden automatisch ermittelt.
       selector:
         entity:
-          integration: esphome
           domain: sensor
+          filter:
+            name: ".*Charging State$"
+
           
 
     mqtt_prefix:
