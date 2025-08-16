@@ -1,0 +1,62 @@
+blueprint:
+  name: Tesla EVCC MQTT Status (Device-basiert)
+  description: Sendet automatisch SOC, SOC-Limit, Reichweite und Ladezustand eines Tesla Fahrzeugs per MQTT. Nutzer wählt nur das Fahrzeug-Device aus.
+  domain: automation
+
+  input:
+    vehicle_device:
+      name: Tesla Fahrzeug
+      description: Wähle das Fahrzeug-Device aus. Alle Sensoren werden automatisch ermittelt.
+      selector:
+        device:
+          integration: tesla_ble
+
+    mqtt_prefix:
+      name: MQTT Topic Prefix
+      description: Basis-Topic für alle Statusmeldungen
+      default: ha-pv/1
+      selector:
+        text:
+
+trigger:
+  - platform: time_pattern
+    seconds: /10
+
+action:
+  - variables:
+      # Entitäten automatisch aus dem Device ermitteln
+      soc_sensor: >
+        {% set s = expand(device_attr(input.vehicle_device, 'entities')) | selectattr('entity_id','search','charge_level') | list %}
+        {{ s[0].entity_id if s else None }}
+      soc_limit_sensor: >
+        {% set s = expand(device_attr(input.vehicle_device, 'entities')) | selectattr('entity_id','search','charge_limit') | list %}
+        {{ s[0].entity_id if s else None }}
+      range_sensor: >
+        {% set s = expand(device_attr(input.vehicle_device, 'entities')) | selectattr('entity_id','search','range') | list %}
+        {{ s[0].entity_id if s else None }}
+      charge_state_sensor: >
+        {% set s = expand(device_attr(input.vehicle_device, 'entities')) | selectattr('entity_id','search','charging_state') | list %}
+        {{ s[0].entity_id if s else None }}
+
+      # MQTT Werte vorbereiten
+      values:
+        "{{ input.mqtt_prefix }}/tesla-soc": "{{ states(soc_sensor)|float if soc_sensor else 0 }}"
+        "{{ input.mqtt_prefix }}/tesla-soc-limit": "{{ states(soc_limit_sensor)|int if soc_limit_sensor else 0 }}"
+        "{{ input.mqtt_prefix }}/tesla-range": "{{ states(range_sensor)|int if range_sensor else 0 }}"
+        "{{ input.mqtt_prefix }}/tesla-charge-status": >-
+          {{
+          {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","Complete":"d","Error":"f"}[states(charge_state_sensor)]
+          if charge_state_sensor else "a"
+          }}
+
+  - repeat:
+      for_each: "{{ values | dict2items }}"
+      sequence:
+        - service: mqtt.publish
+          data:
+            topic: "{{ repeat.item.key }}"
+            payload: "{{ repeat.item.value }}"
+            qos: 0
+            retain: false
+
+mode: single
