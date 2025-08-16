@@ -11,7 +11,7 @@ blueprint:
     mqtt_prefix:
       name: MQTT Topic-Pfad
       description: Basis-Pfad für die MQTT Topics (ohne abschließenden /).
-      default: ha-pv/1
+      default: ha-evcc/1
       selector:
         text:
 
