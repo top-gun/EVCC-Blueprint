@@ -18,7 +18,7 @@ action:
     data:
       qos: 0
       retain: false
-      topic: ha-pv/1/tesla-soc
+      topic: ha-evcc-test/1/tesla-soc
       payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
     metadata: {}
   - alias: MQTT publish Tesla charge limit
@@ -26,7 +26,7 @@ action:
     data:
       qos: 0
       retain: false
-      topic: ha-pv/1/tesla-soc-limit
+      topic: ha-evcc-test/1/tesla-soc-limit
       payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_limit$') | first)|int }}"
     metadata: {}
   - alias: MQTT publish Tesla range
@@ -34,7 +34,7 @@ action:
     data:
       qos: 0
       retain: false
-      topic: ha-pv/1/tesla-range
+      topic: ha-evcc-test/1/tesla-range
       payload: "{{ states(device_entities(device_id) | select('match', '.*_range$') | first)|int }}"
     metadata: {}
   - alias: MQTT publish Tesla charge status
@@ -42,7 +42,7 @@ action:
     data:
       qos: 0
       retain: false
-      topic: ha-pv/1/tesla-charge-status
+      topic: ha-evcc-test/1/tesla-charge-status
       payload: >-
         {{
         {"disconnected":"a","ready":"b","charging":"c","stopped":"d","complete":"b","error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)|lower]
@@ -54,7 +54,7 @@ action:
     data:
       qos: 0
       retain: false
-      topic: ha-pv/1/tesla-odometer
+      topic: ha-evcc-test/1/tesla-odometer
       payload: "{{ states(device_entities(device_id) | select('match', '.*_odometer$') | first)|int }}"
     metadata: {}
   - alias: MQTT publish Tesla finish time
@@ -62,7 +62,7 @@ action:
     data:
       qos: 1
       retain: false
-      topic: ha-pv/1/tesla-finishtime
+      topic: ha-evcc-test/1/tesla-finishtime
       payload: "{{ states('sensor.evcc_wallbox_current_request') }}"
     metadata: {}
 variables:
