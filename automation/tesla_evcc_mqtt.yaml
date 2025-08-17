@@ -45,7 +45,7 @@ action:
       topic: ha-evcc-test/1/tesla-charge-status
       payload: >-
         {{
-        {"disconnected":"a","ready":"b","charging":"c","stopped":"d","complete":"b","error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)|lower]
+        {"disconnected":"a","ready":"b","No Power":"B","charging":"c","stopped":"d","complete":"b","error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)|lower]
         }}
     metadata: {}
     enabled: true
