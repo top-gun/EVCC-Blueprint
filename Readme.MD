@@ -1,5 +1,9 @@
-This contains blueprints of my automations to feed vehicle data of my Tesla to EVCC
+Dieser Blueprint ermöglicht die Veröffentlichung von Tesla BLE-Sensorwerten über MQTT und die Steuerung des Ladevorganges basierend auf MQTT-Nachrichten.
 
-To import the automation, press import blueprint, and use the folling URL:
+## Installation
+
+1. Kopiere die folgende URL, um den Blueprint in Home Assistant zu importieren:
+
+```plaintext
 https://raw.githubusercontent.com/top-gun/EVCC-Blueprint/main/automation/tesla_evcc_mqtt.yaml
 
