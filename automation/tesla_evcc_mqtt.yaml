@@ -107,7 +107,6 @@ action:
                 "{{ tf }}"
             metadata: {}
           - alias: MQTT publish Tesla SOC
-            action   
             action: mqtt.publish
             data:
               qos: 1
