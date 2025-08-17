@@ -1,6 +1,6 @@
 blueprint:
-  name: Tesla BLE MQTT Publisher
-  description: Publishes Tesla BLE sensor states to MQTT topics every 10 seconds.
+  name: Tesla BLE EVCC Communication
+  description: Publishes Tesla BLE sensor states to MQTT every 10 seconds and controls a wallbox based on MQTT messages.
   domain: automation
   input:
     tesla_device:
@@ -8,63 +8,150 @@ blueprint:
       description: Select the Tesla BLE device to monitor.
       selector:
         device:
+          integration: tesla_ble
+    wb_enable_topic:
+      name: Wallbox Enable Request Topic
+      description: The MQTT topic to subscribe to for enabling/disabling the wallbox.
+      selector:
+        text:
+          type: text
+      default: ha-evcc/1/wb-enable-request
+    max_charge_topic:
+      name: Max Charge Requested Topic
+      description: The MQTT topic to subscribe to for setting the max charge current.
+      selector:
+        text:
+          type: text
+      default: ha-evcc/1/max-charge-requested
+    wallbox_switch:
+      name: Wallbox Switch
+      description: Select the switch entity for enabling/disabling the wallbox.
+      selector:
+        entity:
+          domain: switch
+    wallbox_current:
+      name: Wallbox Current Number
+      description: Select the number entity for setting the max charge current.
+      selector:
+        entity:
+          domain: number
+    notify_entity:
+      name: Notification Entity (Optional)
+      description: Select the notification entity to send messages (leave empty to disable notifications).
+      selector:
+        entity:
+          domain: notify
+      default: ""
+  source_url: https://example.com/tesla_ble_mqtt_combined.yaml
 trigger:
   - platform: time_pattern
     seconds: /10
+    id: publish_sensors
+  - platform: mqtt
+    topic: !input wb_enable_topic
+    id: wb_enable_request
+  - platform: mqtt
+    topic: !input max_charge_topic
+    id: max_charge_requested
 condition: []
 action:
-  - alias: MQTT publish Tesla Battery SOC
-    action: mqtt.publish
-    data:
-      qos: 0
-      retain: false
-      topic: ha-evcc-test/1/tesla-soc
-      payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
-    metadata: {}
-  - alias: MQTT publish Tesla charge limit
-    action: mqtt.publish
-    data:
-      qos: 0
-      retain: false
-      topic: ha-evcc-test/1/tesla-soc-limit
-      payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_limit$') | first)|int }}"
-    metadata: {}
-  - alias: MQTT publish Tesla range
-    action: mqtt.publish
-    data:
-      qos: 0
-      retain: false
-      topic: ha-evcc-test/1/tesla-range
-      payload: "{{ states(device_entities(device_id) | select('match', '.*_range$') | first)|int }}"
-    metadata: {}
-  - alias: MQTT publish Tesla charge status
-    action: mqtt.publish
-    data:
-      qos: 0
-      retain: false
-      topic: ha-evcc-test/1/tesla-charge-status
-      payload: >-
-        {{
-        {"disconnected":"a","ready":"b","No Power":"B","charging":"c","stopped":"d","complete":"b","error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)|lower]
-        }}
-    metadata: {}
-    enabled: true
-  - alias: MQTT publish Tesla odometer
-    action: mqtt.publish
-    data:
-      qos: 0
-      retain: false
-      topic: ha-evcc-test/1/tesla-odometer
-      payload: "{{ states(device_entities(device_id) | select('match', '.*_odometer$') | first)|int }}"
-    metadata: {}
-  - alias: MQTT publish Tesla finish time
-    action: mqtt.publish
-    data:
-      qos: 1
-      retain: false
-      topic: ha-evcc-test/1/tesla-finishtime
-      payload: "{{ states('sensor.evcc_wallbox_current_request') }}"
-    metadata: {}
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.id == 'publish_sensors' }}"
+        sequence:
+          - alias: MQTT publish Tesla charge limit
+            action: mqtt.publish
+            data:
+              qos: 0
+              retain: false
+              topic: ha-evcc/1/tesla-soc-limit
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_limit$') | first)|int }}"
+            metadata: {}
+          - alias: MQTT publish Tesla range
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/1/tesla-range
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_range$') | first)|int }}"
+            metadata: {}
+          - alias: MQTT publish Tesla charge status
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/1/tesla-charge-status
+              payload: >-
+                {{
+                {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","No Power":"b","Complete":"b","Error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)]
+                }}
+            metadata: {}
+            enabled: true
+          - alias: MQTT publish Tesla odometer
+            action: mqtt.publish
+            data:
+              qos: 0
+              retain: false
+              topic: ha-evcc/1/tesla-odometer
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_odometer$') | first)|int }}"
+            metadata: {}
+          - alias: MQTT publish Tesla finish time
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/1/tesla-finishtime
+              payload: >
+                {% set tf = now() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int) %}
+                "{{ tf }}"
+            metadata: {}
+          - alias: MQTT publish Tesla SOC
+            action   
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/1/tesla-soc
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
+            metadata: {}
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.id == 'wb_enable_request' }}"
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ trigger.payload | bool }}"
+            then:
+              - condition: template
+                value_template: "{{ notify_entity != '' }}"
+              - action: notify.notify
+                data:
+                  message: Wallbox enable requested, turning on Tesla charging
+                target: !input notify_entity
+              - action: switch.turn_on
+                target:
+                  entity_id: !input wallbox_switch
+            else:
+              - action: switch.turn_off
+                target:
+                  entity_id: !input wallbox_switch
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.id == 'max_charge_requested' }}"
+        sequence:
+          - condition: template
+            value_template: "{{ notify_entity != '' }}"
+          - action: notify.notify
+            data:
+              message: Max charge current requested, adjusting Tesla
+            target: !input notify_entity
+          - action: number.set_value
+            data:
+              value: "{{ trigger.payload | int }}"
+            target:
+              entity_id: !input wallbox_current
 variables:
   device_id: !input tesla_device
+  notify_entity: !input notify_entity
 mode: single
