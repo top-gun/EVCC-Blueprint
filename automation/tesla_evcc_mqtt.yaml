@@ -8,7 +8,6 @@ blueprint:
       description: Select the Tesla BLE device to monitor.
       selector:
         device:
-          integration: tesla_ble
     wb_enable_topic:
       name: Wallbox Enable Request Topic
       description: The MQTT topic to subscribe to for enabling/disabling the wallbox.
