@@ -10,3 +10,5 @@ https://raw.githubusercontent.com/top-gun/EVCC-Blueprint/main/automation/tesla_e
 
 Gehe in Home Assistant zu Einstellungen > Automatisierungen & Szenen > Blueprints und füge die URL ein, um den Blueprint zu importieren.
 Wähle dein Tesla-Gerät und konfiguriere die MQTT-Topics, falls nötig.
+
+Um die Daten in EVCC zu nutzen, füge ein neues Fahrzeug hinzu, Typ "generisches Fahrzeug" und benutze die Einträge aus der Datei EVCCgeneric-vehicle.yaml
