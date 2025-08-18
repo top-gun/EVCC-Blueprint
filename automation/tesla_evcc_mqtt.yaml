@@ -1,5 +1,5 @@
 blueprint:
-  name: Tesla BLE EVCC Communication
+  name: Tesla BLE EVCC Communication-from-Blueprint
   description: Publishes Tesla BLE sensor states to MQTT every 10 seconds and controls a wallbox based on MQTT messages.
   domain: automation
   input:
@@ -83,8 +83,8 @@ action:
               retain: false
               topic: ha-evcc/1/tesla-finishtime
               payload: >
-                {% set tf = now() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int) %}
-                "{{ tf }}"
+                {% set tf = (now() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int)).isoformat() %}
+                {{ tf }}
             metadata: {}
           - alias: MQTT publish Tesla SOC
             action: mqtt.publish
