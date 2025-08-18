@@ -22,6 +22,13 @@ blueprint:
         text:
           type: text
       default: ha-evcc/1/max-charge-requested
+    instance_number:
+      name: Instance Number
+      description: The number to use in MQTT topic paths (e.g., ha-evcc/<number>/...).
+      selector:
+        text:
+          type: text
+      default: "1"
   source_url: https://example.com/tesla_ble_mqtt_combined.yaml
 trigger:
   - platform: time_pattern
@@ -45,7 +52,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: ha-evcc/1/tesla-soc-limit
+              topic: ha-evcc/{{ instance_number }}/tesla-soc-limit
               payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_limit$') | first)|int }}"
             metadata: {}
           - alias: MQTT publish Tesla range
@@ -53,7 +60,7 @@ action:
             data:
               qos: 1
               retain: false
-              topic: ha-evcc/1/tesla-range
+              topic: ha-evcc/{{ instance_number }}/tesla-range
               payload: "{{ states(device_entities(device_id) | select('match', '.*_range$') | first)|int }}"
             metadata: {}
           - alias: MQTT publish Tesla charge status
@@ -61,7 +68,7 @@ action:
             data:
               qos: 1
               retain: false
-              topic: ha-evcc/1/tesla-charge-status
+              topic: ha-evcc/{{ instance_number }}/tesla-charge-status
               payload: >-
                 {{
                 {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","No Power":"b","Complete":"b","Error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)]
@@ -73,7 +80,7 @@ action:
             data:
               qos: 0
               retain: false
-              topic: ha-evcc/1/tesla-odometer
+              topic: ha-evcc/{{ instance_number }}/tesla-odometer
               payload: "{{ states(device_entities(device_id) | select('match', '.*_odometer$') | first)|int }}"
             metadata: {}
           - alias: MQTT publish Tesla finish time
@@ -81,7 +88,7 @@ action:
             data:
               qos: 1
               retain: false
-              topic: ha-evcc/1/tesla-finishtime
+              topic: ha-evcc/{{ instance_number }}/tesla-finishtime
               payload: >
                 {% set ts = now().utcnow() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int) %}
                 {{ ts.strftime("%Y-%m-%dT%H:%M:%SZ") }}
@@ -91,7 +98,7 @@ action:
             data:
               qos: 1
               retain: false
-              topic: ha-evcc/1/tesla-soc
+              topic: ha-evcc/{{ instance_number }}/tesla-soc
               payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
             metadata: {}
       - conditions:
@@ -124,4 +131,5 @@ action:
               entity_id: "{{ device_entities(device_id) | select('match', 'number.*_charging_amps$') | first }}"
 variables:
   device_id: !input tesla_device
+  instance_number: !input instance_number
 mode: single
