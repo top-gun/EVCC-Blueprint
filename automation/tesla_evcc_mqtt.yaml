@@ -1,5 +1,5 @@
 blueprint:
-  name: Tesla BLE EVCC Communication-from-Blueprint
+  name: Tesla BLE EVCC Communication
   description: Publishes Tesla BLE sensor states to MQTT every 10 seconds and controls a wallbox based on MQTT messages.
   domain: automation
   input:
@@ -76,14 +76,6 @@ action:
               topic: ha-evcc/1/tesla-odometer
               payload: "{{ states(device_entities(device_id) | select('match', '.*_odometer$') | first)|int }}"
             metadata: {}
-          - alias: MQTT publish Tesla SOC
-            action: mqtt.publish
-            data:
-              qos: 1
-              retain: false
-              topic: ha-evcc/1/tesla-soc
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
-            metadata: {}
           - alias: MQTT publish Tesla finish time
             action: mqtt.publish
             data:
@@ -91,8 +83,15 @@ action:
               retain: false
               topic: ha-evcc/1/tesla-finishtime
               payload: >
-                {% set tf = (now() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int)).isoformat() %}
-                {{ tf }}
+                {{ (now() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int)).strftime("%Y-%m-%dT%H:%M:%S%z")[:22] ~ ":" ~ (now() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int)).strftime("%Y-%m-%dT%H:%M:%S%z")[22:] }}
+            metadata: {}
+          - alias: MQTT publish Tesla SOC
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/1/tesla-soc
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
             metadata: {}
       - conditions:
           - condition: template
