@@ -24,7 +24,7 @@ blueprint:
       default: ha-evcc/1/max-charge-requested
     instance_number:
       name: Instance Number
-      description: The number to use in MQTT topic paths (e.g., ha-evcc/<number>/...).
+      description: The number to use in MQTT topic paths (e.g., ha-evcc/<number>/...). Use this if you have multiple Teslas.
       selector:
         text:
           type: text
