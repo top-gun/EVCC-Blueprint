@@ -33,11 +33,10 @@ odometer:
 getmaxcurrent: # max charge current
   source: const
   value: 16.0 # A
-# !!! Finishtime is as of 08/18 still in development. If you use the dev-branch, you can remove the comment tags and enjoy a new datapoint. The blueprint does support it.
-#finishtime: # finish time (RFC3339)
-#  source: mqtt
-#  topic: ha-evcc/1/tesla-finishtime
-#  timeout: 60s
+finishtime: # finish time (RFC3339)
+  source: mqtt
+  topic: ha-evcc/1/tesla-finishtime
+  timeout: 60s
 
 ## optional attributes (writeable)
 
