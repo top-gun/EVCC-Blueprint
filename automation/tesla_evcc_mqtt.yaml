@@ -83,7 +83,8 @@ action:
               retain: false
               topic: ha-evcc/1/tesla-finishtime
               payload: >
-                {{ (now() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int)).strftime("%Y-%m-%dT%H:%M:%S%z")[:22] ~ ":" ~ (now() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int)).strftime("%Y-%m-%dT%H:%M:%S%z")[22:] }}
+                {% set ts = now().utcnow() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int) %}
+                {{ ts.strftime("%Y-%m-%dT%H:%M:%SZ") }}
             metadata: {}
           - alias: MQTT publish Tesla SOC
             action: mqtt.publish
