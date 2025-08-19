@@ -30,7 +30,7 @@ blueprint:
         text:
           type: text
       default: ha-evcc/1/max-charge-requested
-source_url: https://raw.githubusercontent.com/top-gun/EVCC-Blueprint/main/automation/tesla_evcc_mqtt.yaml
+  source_url: https://raw.githubusercontent.com/top-gun/EVCC-Blueprint/main/automation/tesla_evcc_mqtt.yaml
 trigger:
   - platform: time_pattern
     seconds: /10
