@@ -108,7 +108,7 @@ action:
               qos: 1
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-charger
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_charger$') | first)==\"on\" }}"
+              payload: "{{ states('switch.' + (device_id) + '_charger') == 'on' }}"
             metadata: {}
           - alias: MQTT publish Tesla charge power
             action: mqtt.publish
