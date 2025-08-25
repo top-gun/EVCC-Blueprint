@@ -1,0 +1,73 @@
+## required attributes [type: custom]
+
+status: # charger status (A: not connected, B: connected, C: charging)
+  source: mqtt
+  topic: ha-evcc/1/tesla-charge-status
+  timeout: 60s
+enabled: # is charging enabled?
+  source: mqtt
+  topic: ha-evcc/1/tesla-charger
+  timeout: 60s
+enable: # enable/disable charging
+  source: mqtt
+  topic: ha-evcc/1/wb-enable-request
+  timeout: 60s
+maxcurrent: # set maximum charge current in A
+  source: mqtt
+  topic: ha-evcc/1/max-charge-requested
+  timeout: 60s
+
+## optional attributes (read-only)
+
+#icon: generic # icon for UI purpose only
+power: # charge power in W
+  source: mqtt
+  topic: ha-evcc/1/tesla-charge-power
+  timeout: 60s
+energy: # meter reading in kWh
+  source: mqtt
+  topic: ha-evcc/1/tesla-energy-added
+  timeout: 60s
+#identify: # current RFID identifier
+#  source: const
+#  value: "1234567890"
+#soc: # state of charge in %
+#  source: const
+#  value: 75
+#powers: # phase powers in W
+#  - source: const
+#    value: 3600
+#  - source: const
+#    value: 3700
+#  - source: const
+#    value: 3800
+currents: # phase currents in A
+  - source: mqtt
+    topic: ha-evcc/1/tesla-actual-current
+    timeout: 60s
+  - source: mqtt
+    topic: ha-evcc/1/tesla-actual-current
+    timeout: 60s
+  - source: mqtt
+    topic: ha-evcc/1/tesla-actual-current
+    timeout: 60s
+#voltages: # phase voltages in V
+#  - source: const
+#    value: 230.1
+#  - source: const
+#    value: 230.2
+#  - source: const
+#    value: 230.3
+
+## optional attributes (writeable)
+
+#maxcurrentmillis: # set maximum charge current in A with decimal precision
+#  source: js
+#  script: console.log(maxcurrentmillis);
+#phases1p3p: # switch phases (requires 'tos: true')
+#  source: js
+#  script: console.log(phases1p3p);
+#tos: true
+#wakeup: # wake up vehicle
+#  source: js
+#  script: console.log(wakeup);
