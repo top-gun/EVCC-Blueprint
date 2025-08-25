@@ -102,6 +102,38 @@ action:
               topic: ha-evcc/{{ instance_number }}/tesla-soc
               payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
             metadata: {}
+          - alias: MQTT publish Tesla Charger State
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/{{ instance_number }}/tesla-charger
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charger$') | first)=="on" }}"
+            metadata: {}
+          - alias: MQTT publish Tesla charge power
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/{{ instance_number }}/tesla-charge-power
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_power$') | first)|int*1000 }}"
+            metadata: {}
+          - alias: MQTT publish Tesla energy added
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/{{ instance_number }}/tesla-energy-added
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_energy_added$') | first)|float }}"
+            metadata: {}
+          - alias: MQTT publish Tesla charge current
+            action: mqtt.publish
+            data:
+              qos: 1
+              retain: false
+              topic: ha-evcc/{{ instance_number }}/tesla-charge-current
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_current$') | first)|float }}"
+            metadata: {}
       - conditions:
           - condition: template
             value_template: "{{ trigger.id == 'wb_enable_request' }}"
