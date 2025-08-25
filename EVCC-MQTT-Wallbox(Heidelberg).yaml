@@ -1,0 +1,76 @@
+## required attributes [type: custom]
+
+status: # charger status (A: not connected, B: connected, C: charging)
+  source: mqtt
+  topic: ha-evcc/1/wb-con
+  timeout: 60s
+enabled: # is charging enabled?
+  source: mqtt
+  topic: ha-evcc/1/wb-enabled
+  timeout: 60s
+enable: # set charger enabled state (true/false or 0/1)
+  source: mqtt
+  topic: ha-evcc/1/wb-enable-request
+  timeout: 30s
+maxcurrent: # set maximum charge current in A
+  source: mqtt
+  topic: ha-evcc/1/max-charge-requested
+
+## optional attributes (read-only)
+
+power: # charge power in W
+  source: mqtt
+  topic: ha-evcc/1/wb-charge-power
+  timeout: 60s
+
+energy: # meter reading in kWh
+  source: mqtt
+  topic: ha-evcc/1/wb-charge-energy
+  timeout: 60s
+
+#identify: # current RFID identifier
+#  source: const
+#  value: "1234567890"
+#soc: # state of charge in %
+#  source: const
+#  value: 75
+#powers: # phase powers in W
+#  - source: const
+#    value: 3600
+#  - source: const
+#    value: 3700
+#  - source: const
+#    value: 3800
+currents: # phase currents in A
+  - source: mqtt
+    topic: ha-evcc/1/wb-current-l1
+    timeout: 60s
+  - source: mqtt
+    topic: ha-evcc/1/wb-current-l2
+    timeout: 60s
+  - source: mqtt
+    topic: ha-evcc/1/wb-current-l3
+    timeout: 60s
+voltages: # phase voltages in V
+  - source: mqtt
+    topic: ha-evcc/1/wb-voltage-l1
+    timeout: 60s
+  - source: mqtt
+    topic: ha-evcc/1/wb-voltage-l2
+    timeout: 60s
+  - source: mqtt
+    topic: ha-evcc/1/wb-voltage-l3
+    timeout: 60s
+
+## optional attributes (writeable)
+
+#maxcurrentmillis: # set maximum charge current in A with decimal precision
+#  source: js
+#  script: console.log(maxcurrentmillis);
+#phases1p3p: # switch phases (requires 'tos: true')
+#  source: js
+#  script: console.log(phases1p3p);
+#tos: true
+#wakeup: # wake up vehicle
+#  source: js
+#  script: console.log(wakeup);
