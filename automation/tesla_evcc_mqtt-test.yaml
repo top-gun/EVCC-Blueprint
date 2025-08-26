@@ -55,119 +55,87 @@ actions:
             action: mqtt.publish
             metadata: {}
             data:
-              evaluate_payload: false
               qos: 0
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-soc-limit"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_charge_limit$') | first %}
-                {{ states(entity) | int(0) | string if entity else '0' }}
+              payload: "{{ states(device_entities(!input device) | select('search', '_charge_limit$') | first | default('')) | int(0) | string }}"
           - alias: MQTT publish Tesla range
             action: mqtt.publish
             metadata: {}
             data:
-              evaluate_payload: false
-              qos: "1"
+              qos: 1
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-range"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_range$') | first %}
-                {{ states(entity) | int(0) | string if entity else '0' }}
+              payload: "{{ states(device_entities(!input device) | select('search', '_range$') | first | default('')) | int(0) | string }}"
           - alias: MQTT publish Tesla charge status
             action: mqtt.publish
             metadata: {}
             data:
-              evaluate_payload: false
-              qos: "1"
+              qos: 1
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-charge-status"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_charging_state$') | first %}
-                {{ {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","No Power":"b","Complete":"b","Error":"f"}[states(entity)] if entity else 'b' }}
+              payload: "{{ {'Disconnected':'a','Ready':'b','Charging':'c','Stopped':'d','No Power':'b','Complete':'b','Error':'f'}.get(states(device_entities(!input device) | select('search', '_charging_state$') | first | default('')), 'b') }}"
             enabled: true
           - alias: MQTT publish odometer
             action: mqtt.publish
             metadata: {}
             data:
-              evaluate_payload: false
               qos: 0
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-odometer"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_odometer$') | first %}
-                {{ states(entity) | int(0) | string if entity else '0' }}
+              payload: "{{ states(device_entities(!input device) | select('search', '_odometer$') | first | default('')) | int(0) | string }}"
           - alias: MQTT publish Tesla minutes to charge limit
             action: mqtt.publish
             metadata: {}
             data:
-              evaluate_payload: false
-              qos: "1"
+              qos: 1
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-finishtime"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_minutes_to_limit$') | first %}
-                {% if entity %}
-                  {% set tf = now() + timedelta(minutes=states(entity) | int(0)) %}
-                  "{{ tf }}"
-                {% else %}
-                  "{{ now() }}"
-                {% endif %}
+              payload: "{{ (now() + timedelta(minutes=states(device_entities(!input device) | select('search', '_minutes_to_limit$') | first | default('')) | int(0))) | string }}"
           - alias: MQTT publish Tesla SOC
             action: mqtt.publish
             metadata: {}
             data:
-              qos: "1"
+              qos: 1
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-soc"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_charge_level$') | first %}
-                {{ states(entity) | float(0) | string if entity else '0' }}
+              payload: "{{ states(device_entities(!input device) | select('search', '_charge_level$') | first | default('')) | float(0) | string }}"
           - alias: MQTT publish Tesla charger state
             action: mqtt.publish
             metadata: {}
             data:
-              qos: "1"
+              qos: 1
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-charger"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_charger$') | first %}
-                {{ '1' if states(entity) == 'on' else '0' if entity else '0' }}
+              payload: "{{ '1' if states(device_entities(!input device) | select('search', '_charger$') | first | default('')) == 'on' else '0' }}"
           - alias: MQTT publish Tesla charge power
             action: mqtt.publish
             metadata: {}
             data:
-              qos: "1"
+              qos: 1
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-charge-power"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_charge_power$') | first %}
-                {{ states(entity) | float(0) | string if entity else '0' }}
+              payload: "{{ states(device_entities(!input device) | select('search', '_charge_power$') | first | default('')) | float(0) | string }}"
           - alias: MQTT publish Tesla energy added
             action: mqtt.publish
             metadata: {}
             data:
-              qos: "1"
+              qos: 1
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-energy-added"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_charge_energy_added$') | first %}
-                {{ states(entity) | float(0) | string if entity else '0' }}
+              payload: "{{ states(device_entities(!input device) | select('search', '_charge_energy_added$') | first | default('')) | float(0) | string }}"
           - alias: MQTT publish Tesla charge current
             action: mqtt.publish
             metadata: {}
             data:
-              qos: "1"
+              qos: 1
               retain: false
               topic: "ha-evcc/{{ !input instance_id }}/tesla-charge-current"
-              payload: >-
-                {% set entity = device_entities(!input device) | select('search', '_charge_current$') | first %}
-                {{ states(entity) | float(0) | string if entity else '0' }}
+              payload: "{{ states(device_entities(!input device) | select('search', '_charge_current$') | first | default('')) | float(0) | string }}"
       - conditions:
           - alias: WB Schalten angefordert
             condition: template
-            value_template: >
-              {{ trigger.platform == 'mqtt' and trigger.topic ==
-              'ha-evcc/{{ !input instance_id }}/{{ !input wb_enable_request_suffix }}' }}
+            value_template: "{{ trigger.platform == 'mqtt' and trigger.topic == 'ha-evcc/{{ !input instance_id }}/{{ !input wb_enable_request_suffix }}' }}"
         sequence:
           - alias: Wallbox an- oder abschalten angefordert?
             if:
@@ -192,9 +160,7 @@ actions:
                       entity_id: "{{ device_entities(!input device) | select('search', '_charger$') | first | default('') }}"
       - conditions:
           - condition: template
-            value_template: >
-              {{ trigger.platform == 'mqtt' and trigger.topic ==
-              'ha-evcc/{{ !input instance_id }}/{{ !input max_charge_requested_suffix }}' }}
+            value_template: "{{ trigger.platform == 'mqtt' and trigger.topic == 'ha-evcc/{{ !input instance_id }}/{{ !input max_charge_requested_suffix }}' }}"
           - condition: state
             entity_id: "{{ device_entities(!input device) | select('search', '_charging_state$') | first | default('') }}"
             state: Charging
