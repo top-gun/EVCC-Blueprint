@@ -43,13 +43,13 @@ energy: # meter reading in kWh
 #    value: 3800
 currents: # phase currents in A
   - source: mqtt
-    topic: ha-evcc/1/tesla-actual-current
+    topic: ha-evcc/1/tesla-charge-current
     timeout: 60s
   - source: mqtt
-    topic: ha-evcc/1/tesla-actual-current
+    topic: ha-evcc/1/tesla-charge-current
     timeout: 60s
   - source: mqtt
-    topic: ha-evcc/1/tesla-actual-current
+    topic: ha-evcc/1/tesla-charge-current
     timeout: 60s
 #voltages: # phase voltages in V
 #  - source: const
