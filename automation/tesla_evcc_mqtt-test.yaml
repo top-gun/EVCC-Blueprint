@@ -140,7 +140,7 @@ actions:
           - alias: Wallbox an- oder abschalten angefordert?
             if:
               - condition: template
-                value_template: "{{ trigger.payload }}"
+                value_template: "{{ trigger.payload | bool(false) }}"
             then:
               - action: switch.turn_on
                 metadata: {}
@@ -165,9 +165,9 @@ actions:
             entity_id: "{{ device_entities(!input device) | select('search', '_charging_state$') | first | default('') }}"
             state: Charging
         sequence:
-          - data_template:
+          - action: number.set_value
+            data:
               entity_id: "{{ device_entities(!input device) | select('search', '_charging_amps$') | first | default('') }}"
               value: "{{ trigger.payload | int(0) }}"
             enabled: true
-            action: number.set_value
 mode: single
