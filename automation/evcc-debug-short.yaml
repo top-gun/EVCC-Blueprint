@@ -1,24 +1,25 @@
 blueprint:
-  name: Test Template Condition
-  description: Test blueprint for template condition
+  name: Test Number Set Value
+  description: Test blueprint for number.set_value with dynamic entity_id
   domain: automation
   input:
     tesla_device:
       name: Tesla BLE Device
-      description: Select the ESPHome-provided device.
+      description: 2-Select the ESPHome-provided device.
       selector:
         device:
           integration: esphome
-variables:
-  device_id: !input tesla_device
+  variables:
+    device_id: !input tesla_device
 trigger:
-  - platform: time_pattern
-    seconds: /10
+  - platform: mqtt
+    topic: ha-evcc/1/test
     id: test_trigger
-condition:
-  - condition: template
-    value_template: "{{ states(device_entities(device_id) | select('match', '.*_charging_state$') | first) == 'Charging' }}"
 action:
-  - service: system_log.write
+  - condition: template
+    value_template: "{{ trigger.id == 'test_trigger' }}"
+  - action: number.set_value
     data:
-      message: "Template condition passed"
+      value: 10
+    target:
+      entity_id: "{{ device_entities(device_id) | select('match', 'number.*_charging_amps$') | first }}"
