@@ -59,7 +59,7 @@ actions:
               qos: 0
               retain: false
               topic: ha-evcc/{{ !input instance_id }}/tesla-soc-limit
-              payload: "{{ states( device_entities(!input device) | select('search', '_charge_limit$') | first ) | int }}"
+              payload: "{{ (states(device_entities(!input device) | select('search', '_charge_limit$') | first) | int) | string }}"
           - alias: MQTT publish Tesla range
             action: mqtt.publish
             metadata: {}
@@ -68,7 +68,7 @@ actions:
               qos: "1"
               retain: false
               topic: ha-evcc/{{ !input instance_id }}/tesla-range
-              payload: "{{ states( device_entities(!input device) | select('search', '_range$') | first ) | int }}"
+              payload: "{{ (states(device_entities(!input device) | select('search', '_range$') | first) | int) | string }}"
           - alias: MQTT publish Tesla charge status
             action: mqtt.publish
             metadata: {}
@@ -80,7 +80,7 @@ actions:
               payload: >-
                 {{
                 {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","No
-                Power":"b","Complete":"b","Error":"f"}[states( device_entities(!input device) | select('search', '_charging_state$') | first )]
+                Power":"b","Complete":"b","Error":"f"}[states(device_entities(!input device) | select('search', '_charging_state$') | first)]
                 }}
             enabled: true
           - alias: MQTT publish odometer
@@ -91,7 +91,7 @@ actions:
               qos: 0
               retain: false
               topic: ha-evcc/{{ !input instance_id }}/tesla-odometer
-              payload: "{{ states( device_entities(!input device) | select('search', '_odometer$') | first ) | int }}"
+              payload: "{{ (states(device_entities(!input device) | select('search', '_odometer$') | first) | int) | string }}"
           - alias: MQTT publish Tesla minutes to charge limit
             action: mqtt.publish
             metadata: {}
@@ -102,7 +102,7 @@ actions:
               topic: ha-evcc/{{ !input instance_id }}/tesla-finishtime
               payload: >
                 {% set tf = now() +
-                timedelta(minutes=states( device_entities(!input device) | select('search', '_minutes_to_limit$') | first ) | int)
+                timedelta(minutes=states(device_entities(!input device) | select('search', '_minutes_to_limit$') | first) | int)
                 %} "{{ tf }}"
           - alias: MQTT publish Tesla SOC
             action: mqtt.publish
@@ -111,7 +111,7 @@ actions:
               qos: "1"
               retain: false
               topic: ha-evcc/{{ !input instance_id }}/tesla-soc
-              payload: "{{ states( device_entities(!input device) | select('search', '_charge_level$') | first ) | float }}"
+              payload: "{{ (states(device_entities(!input device) | select('search', '_charge_level$') | first) | float) | string }}"
           - alias: MQTT publish Tesla charger state
             action: mqtt.publish
             metadata: {}
@@ -119,7 +119,7 @@ actions:
               qos: "1"
               retain: false
               topic: ha-evcc/{{ !input instance_id }}/tesla-charger
-              payload: "{{ '1' if states( device_entities(!input device) | select('search', '_charger$') | first ) == 'on' else '0' }}"
+              payload: "{{ '1' if states(device_entities(!input device) | select('search', '_charger$') | first) == 'on' else '0' }}"
           - alias: MQTT publish Tesla charge power
             action: mqtt.publish
             metadata: {}
@@ -127,7 +127,7 @@ actions:
               qos: "1"
               retain: false
               topic: ha-evcc/{{ !input instance_id }}/tesla-charge-power
-              payload: "{{ states( device_entities(!input device) | select('search', '_charge_power$') | first ) | float }}"
+              payload: "{{ (states(device_entities(!input device) | select('search', '_charge_power$') | first) | float) | string }}"
           - alias: MQTT publish Tesla energy added
             action: mqtt.publish
             metadata: {}
@@ -135,9 +135,7 @@ actions:
               qos: "1"
               retain: false
               topic: ha-evcc/{{ !input instance_id }}/tesla-energy-added
-              payload: >-
-                {{ states( device_entities(!input device) | select('search', '_charge_energy_added$') | first ) | float
-                }}
+              payload: "{{ (states(device_entities(!input device) | select('search', '_charge_energy_added$') | first) | float) | string }}"
           - alias: MQTT publish Tesla charge current
             action: mqtt.publish
             metadata: {}
@@ -145,7 +143,7 @@ actions:
               qos: "1"
               retain: false
               topic: ha-evcc/{{ !input instance_id }}/tesla-charge-current
-              payload: "{{ states( device_entities(!input device) | select('search', '_charge_current$') | first ) | float }}"
+              payload: "{{ (states(device_entities(!input device) | select('search', '_charge_current$') | first) | float) | string }}"
       - conditions:
           - alias: WB Schalten angefordert
             condition: template
