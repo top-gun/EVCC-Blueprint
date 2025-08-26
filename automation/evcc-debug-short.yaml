@@ -1,0 +1,24 @@
+blueprint:
+  name: Test Template Condition
+  description: Test blueprint for template condition
+  domain: automation
+  input:
+    tesla_device:
+      name: Tesla BLE Device
+      description: Select the ESPHome-provided device.
+      selector:
+        device:
+          integration: esphome
+variables:
+  device_id: !input tesla_device
+trigger:
+  - platform: time_pattern
+    seconds: /10
+    id: test_trigger
+condition:
+  - condition: template
+    value_template: "{{ states(device_entities(device_id) | select('match', '.*_charging_state$') | first) == 'Charging' }}"
+action:
+  - service: system_log.write
+    data:
+      message: "Template condition passed"
