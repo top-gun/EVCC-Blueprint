@@ -154,9 +154,8 @@ action:
       - conditions:
           - condition: template
             value_template: "{{ trigger.id == 'max_charge_requested' }}"
-          - condition: state
-            entity_id: "{{ device_entities(device_id) | select('match', '.*_charging_state$') | first }}"
-            state: Charging
+          - condition: template
+            value_template: "{{ states(device_entities(device_id) | select('match', '.*_charging_state$') | first) == 'Charging' }}"
         sequence:
           - action: number.set_value
             data:
