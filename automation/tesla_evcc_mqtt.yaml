@@ -148,12 +148,18 @@ action:
                 target:
                   entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first }}"
             else:
-              - action: switch.turn_off
-                metadata: {}
-                data: {}
-                target:
-                  entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first }}"
-      - conditions:
+              - if:
+                  - condition: state
+                    entity_id: >-
+                      {{ device_entities(device_id) | select('match', 'switch.*_charger$') | first }}
+                    state: "on"
+                then:
+                  - action: switch.turn_off
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: >-
+                        {{ device_entities(device_id) | select('match', 'switch.*_charger$') | first }}      - conditions:
           - condition: template
             value_template: "{{ trigger.id == 'max_charge_requested' }}"
         sequence:
