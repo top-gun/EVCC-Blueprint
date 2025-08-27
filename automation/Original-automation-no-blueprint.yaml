@@ -1,0 +1,161 @@
+alias: EVCC-Communication-Tesla-BLE-original-nicht-löschen
+description: ""
+triggers:
+  - alias: topic received wallbox enable/disable
+    trigger: mqtt
+    topic: ha-evcc/1/wb-enable-request
+  - alias: topic received max-charge-requested
+    trigger: mqtt
+    topic: ha-evcc/1/max-charge-requested
+  - trigger: time_pattern
+    seconds: /10
+    id: publish_sensors
+    enabled: true
+conditions: []
+actions:
+  - choose:
+      - conditions:
+          - alias: 10s abgelaufen
+            condition: template
+            value_template: "{{ trigger.platform == 'time_pattern' }}"
+        sequence:
+          - alias: MQTT publish Tesla charge limit
+            action: mqtt.publish
+            metadata: {}
+            data:
+              evaluate_payload: false
+              qos: 0
+              retain: false
+              topic: ha-evcc/1/tesla-soc-limit
+              payload: "{{ states(\"sensor.tesla_ble_f549c4_charge_limit\")|int }}"
+          - alias: MQTT publish  Tesla range
+            action: mqtt.publish
+            metadata: {}
+            data:
+              evaluate_payload: false
+              qos: "1"
+              retain: false
+              topic: ha-evcc/1/tesla-range
+              payload: "{{ states(\"sensor.tesla_ble_f549c4_range\")|int }}"
+          - alias: MQTT publish Tesla charge status
+            action: mqtt.publish
+            metadata: {}
+            data:
+              evaluate_payload: false
+              qos: "1"
+              retain: false
+              topic: ha-evcc/1/tesla-charge-status
+              payload: >-
+                {{
+                {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","No
+                Power":"b","Complete":"b","Error":"f"}[states("sensor.tesla_ble_f549c4_charging_state")]
+                }}
+            enabled: true
+          - alias: MQTT publish odometer
+            action: mqtt.publish
+            metadata: {}
+            data:
+              evaluate_payload: false
+              qos: 0
+              retain: false
+              topic: ha-evcc/1/tesla-odometer
+              payload: "{{ states(\"sensor.tesla_ble_f549c4_odometer\")|int }}"
+          - alias: MQTT publish  Tesla minutes to charge limit
+            action: mqtt.publish
+            metadata: {}
+            data:
+              evaluate_payload: false
+              qos: "1"
+              retain: false
+              topic: ha-evcc/1/tesla-finishtime
+              payload: >
+                {% set tf = now() +
+                timedelta(minutes=states("sensor.tesla_ble_f549c4_minutes_to_limit")|int)
+                %} "{{ tf }}"
+          - alias: MQTT publish Tesla SOC
+            action: mqtt.publish
+            metadata: {}
+            data:
+              qos: "1"
+              retain: false
+              topic: ha-evcc/1/tesla-soc
+              payload: "{{ states(\"sensor.tesla_ble_f549c4_charge_level\")|float }}"
+          - alias: MQTT publish Tesla charger state
+            action: mqtt.publish
+            metadata: {}
+            data:
+              qos: "1"
+              retain: false
+              topic: ha-evcc/1/tesla-charger
+              payload: >-
+                {{ states("sensor.tesla_ble_f549c4_charging_state") ==
+                "Charging" }}
+          - alias: MQTT publish Tesla charge power
+            action: mqtt.publish
+            metadata: {}
+            data:
+              qos: "1"
+              retain: false
+              topic: ha-evcc/1/tesla-charge-power
+              payload: "{{ states(\"sensor.tesla_ble_f549c4_charge_power\")|float }}"
+          - alias: MQTT publish Tesla energy added
+            action: mqtt.publish
+            metadata: {}
+            data:
+              qos: "1"
+              retain: false
+              topic: ha-evcc/1/tesla-energy-added
+              payload: >-
+                {{ states("sensor.tesla_ble_f549c4_charge_energy_added")|float
+                }}
+          - alias: MQTT publish Tesla charge current
+            action: mqtt.publish
+            metadata: {}
+            data:
+              qos: "1"
+              retain: false
+              topic: ha-evcc/1/tesla-charge-current
+              payload: "{{ states(\"sensor.tesla_ble_f549c4_charge_current\")|float }}"
+      - conditions:
+          - alias: WB Schalten angefordert
+            condition: template
+            value_template: >
+              {{ trigger.platform == 'mqtt' and trigger.topic ==
+              'ha-evcc/1/wb-enable-request' }}
+        sequence:
+          - alias: Wallbox an- oder abschalten angefordert?
+            if:
+              - condition: template
+                value_template: "{{ trigger.payload }}"
+            then:
+              - action: switch.turn_on
+                metadata: {}
+                data: {}
+                target:
+                  entity_id: switch.tesla_ble_f549c4_charger
+            else:
+              - if:
+                  - condition: state
+                    entity_id: switch.tesla_ble_f549c4_charger
+                    state: "on"
+                then:
+                  - action: switch.turn_off
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: switch.tesla_ble_f549c4_charger
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ trigger.platform == 'mqtt' and trigger.topic ==
+              'ha-evcc/1/max-charge-requested' }}
+          - condition: state
+            entity_id: sensor.tesla_ble_f549c4_charging_state
+            state: Charging
+        sequence:
+          - data_template:
+              entity_id: number.tesla_ble_f549c4_charging_amps
+              value: "{{ trigger.payload | int }}"
+            enabled: true
+            action: number.set_value
+mode: single
