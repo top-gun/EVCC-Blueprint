@@ -5,7 +5,7 @@ blueprint:
   input:
     tesla_device:
       name: Tesla BLE Device
-      description: 2-Select the ESPHome-provided device.
+      description: Select the ESPHome-provided device.
       selector:
         device:
           integration: esphome
