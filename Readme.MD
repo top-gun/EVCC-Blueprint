@@ -11,4 +11,6 @@ https://raw.githubusercontent.com/top-gun/EVCC-Blueprint/main/automation/tesla_e
 Gehe in Home Assistant zu Einstellungen > Automatisierungen & Szenen > Blueprints und füge die URL ein, um den Blueprint zu importieren.
 Wähle dein Tesla-Gerät aus der Liste. Die weiteren Einstellungen bleiben unverändert, wenn nur ein Auto gesteuert wird. 
 
+<img width=“964” alt=“java 8 and prio java 8  array review example” src=“https://github.com/top-gun/EVCC-Blueprint/blob/main/pics/automation.PNG”>
+
 Um die Daten in EVCC zu nutzen, füge ein neues Fahrzeug hinzu, Typ "generisches Fahrzeug" und benutze die Einträge aus der Datei EVCCgeneric-vehicle.yaml
