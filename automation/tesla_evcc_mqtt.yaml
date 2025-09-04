@@ -85,10 +85,7 @@ actions:
               retain: false
               topic: "{{ 'ha-evcc/' ~ number ~ '/tesla-charge-status' }}"
               payload: >-
-                {{
-                {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","No
-                Power":"b","Complete":"b","Error":"f"}[states(charging_state_sensor)]
-                }}
+                {{ {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","No Power":"b","Complete":"b","Error":"f"}[states(charging_state_sensor)] }}
             enabled: true
           - alias: MQTT publish odometer
             action: mqtt.publish
@@ -103,10 +100,8 @@ actions:
               qos: "1"
               retain: false
               topic: "{{ 'ha-evcc/' ~ number ~ '/tesla-finishtime' }}"
-              payload: >
-                {% set tf = now() +
-                timedelta(minutes=states(minutes_to_limit_sensor)|int)
-                %} "{{ tf }}"
+              payload: >-
+                {% set tf = now() + timedelta(minutes=states(minutes_to_limit_sensor)|int) %} "{{ tf }}"
           - alias: MQTT publish Tesla SOC
             action: mqtt.publish
             data:
@@ -122,4 +117,67 @@ actions:
               topic: "{{ 'ha-evcc/' ~ number ~ '/tesla-charger' }}"
               payload: "{{ states(charging_state_sensor) == 'Charging' }}"
           - alias: MQTT publish Tesla charge power
-            action
+            action: mqtt.publish
+            data:
+              qos: "1"
+              retain: false
+              topic: "{{ 'ha-evcc/' ~ number ~ '/tesla-charge-power' }}"
+              payload: "{{ states(charge_power_sensor)|float }}"
+          - alias: MQTT publish Tesla energy added
+            action: mqtt.publish
+            data:
+              qos: "1"
+              retain: false
+              topic: "{{ 'ha-evcc/' ~ number ~ '/tesla-energy-added' }}"
+              payload: "{{ states(charge_energy_added_sensor)|float }}"
+          - alias: MQTT publish Tesla charge current
+            action: mqtt.publish
+            data:
+              qos: "1"
+              retain: false
+              topic: "{{ 'ha-evcc/' ~ number ~ '/tesla-charge-current' }}"
+              payload: "{{ states(charge_current_sensor)|float }}"
+      - conditions:
+          - alias: WB Schalten angefordert
+            condition: template
+            value_template: "{{ trigger.platform == 'mqtt' and trigger.topic == wb_enable_topic }}"
+        sequence:
+          - alias: Wallbox an- oder abschalten angefordert?
+            if:
+              - condition: template
+                value_template: "{{ trigger.payload }}"
+            then:
+              - action: switch.turn_on
+                data: {}
+                target:
+                  entity_id: "{{ charger_switch }}"
+            else:
+              - if:
+                  - condition: state
+                    entity_id: "{{ charger_switch }}"
+                    state: "on"
+                then:
+                  - action: switch.turn_off
+                    data: {}
+                    target:
+                      entity_id: "{{ charger_switch }}"
+      - conditions:
+          - condition: template
+            value_template: "{{ trigger.platform == 'mqtt' and trigger.topic == max_charge_topic }}"
+          - condition: state
+            entity_id: "{{ charging_state_sensor }}"
+            state: Charging
+        sequence:
+          - action: number.set_value
+            data:
+              entity_id: "{{ charging_amps_number }}"
+              value: "{{ trigger.payload | int }}"
+          - if:
+              - condition: template
+                value_template: "{{ trigger.payload | int < 6 }}"
+            then:
+              - action: number.set_value
+                data:
+                  entity_id: "{{ charging_amps_number }}"
+                  value: "{{ trigger.payload | int }}"
+mode: single
