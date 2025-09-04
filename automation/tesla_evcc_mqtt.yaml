@@ -72,7 +72,7 @@ action:
               topic: ha-evcc/{{ instance_number }}/tesla-charge-status
               payload: >-
                 {{
-                {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"d","No Power":"b","Complete":"b","Error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)]
+                {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"b","No Power":"b","Complete":"b","Error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)]
                 }}
             metadata: {}
             enabled: true
@@ -116,7 +116,7 @@ action:
               qos: 1
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-charge-power
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_power$') | first)|float }}"
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_power$') | first)|int*1000 }}"
             metadata: {}
           - alias: MQTT publish Tesla energy added
             action: mqtt.publish
@@ -146,24 +146,16 @@ action:
                 metadata: {}
                 data: {}
                 target:
-                  entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first if device_entities(device_id) | select('match', 'switch.*_charger$') | list else '' }}"
+                  entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first }}"
             else:
-              - if:
-                  - condition: state
-                    entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first if device_entities(device_id) | select('match', 'switch.*_charger$') | list else '' }}"
-                    state: "on"
-                then:
-                  - action: switch.turn_off
-                    metadata: {}
-                    data: {}
-                    target:
-                      entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first if device_entities(device_id) | select('match', 'switch.*_charger$') | list else '' }}"
+              - action: switch.turn_off
+                metadata: {}
+                data: {}
+                target:
+                  entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first }}"
       - conditions:
           - condition: template
             value_template: "{{ trigger.id == 'max_charge_requested' }}"
-          - condition: state
-            entity_id: "{{ device_entities(device_id) | select('match', '.*_charging_state$') | first }}"
-            state: Charging
         sequence:
           - action: number.set_value
             data:
