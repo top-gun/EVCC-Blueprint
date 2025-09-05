@@ -10,7 +10,8 @@ blueprint:
         entity:
           multiple: false
           filter:
-           domain: binary_sensor
+            - integration: octopus_germany
+              domain: binary_sensor
 
 trigger:
   - platform: state
