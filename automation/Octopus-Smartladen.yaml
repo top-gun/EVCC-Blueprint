@@ -9,8 +9,8 @@ blueprint:
       selector:
         entity:
           filter:
-           - domain: binary_sensor
-             integration: octopus_energy
+           - integration: octopus_energy
+             domain: binary_sensor
 
 trigger:
   - platform: state
