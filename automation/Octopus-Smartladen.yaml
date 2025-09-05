@@ -9,7 +9,9 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-          integration: octopus_energy
+          filter:
+            name: ^.*Octopus.*$
+            regex: true
 
 trigger:
   - platform: state
