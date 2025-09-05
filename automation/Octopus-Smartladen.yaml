@@ -8,7 +8,8 @@ blueprint:
       description: The binary sensor for Octopus intelligent dispatching
       selector:
         entity:
-          domain: binary_sensor
+          filter:
+           - domain: binary_sensor
 
 trigger:
   - platform: state
