@@ -9,9 +9,8 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-          filter:
-            name: ^.*Octopus.*$
-            regex: true
+          entity_id:
+            regex: ^.*[oO][cC][tT][oO][pP][uU][sS].*$
 
 trigger:
   - platform: state
