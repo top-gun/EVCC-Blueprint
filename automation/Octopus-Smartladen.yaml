@@ -9,7 +9,6 @@ blueprint:
       selector:
         entity:
           multiple: false
-          filter:
            - domain: binary_sensor
 
 trigger:
