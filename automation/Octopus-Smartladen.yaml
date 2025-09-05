@@ -8,9 +8,8 @@ blueprint:
       description: The binary sensor for Octopus intelligent dispatching
       selector:
         entity:
+          integration: octopus_energy
           domain: binary_sensor
-          entity_id:
-            regex: ^.*[oO][cC][tT][oO][pP][uU][sS].*$
 
 trigger:
   - platform: state
