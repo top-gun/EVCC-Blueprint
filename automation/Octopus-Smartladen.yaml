@@ -12,6 +12,16 @@ blueprint:
           filter:
             - integration: octopus_germany
               domain: binary_sensor
+    loadpoint_number:
+      name: Ladepunkt Nummer
+      description: The loadpoint number for EVCC MQTT topics (e.g., 1 for loadpoints/1)
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 10
+          step: 1
+          mode: box
 
 trigger:
   - platform: state
@@ -27,7 +37,7 @@ action:
       evaluate_payload: false
       qos: "1"
       retain: false
-      topic: evcc/loadpoints/1/maxCurrent/set
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/maxCurrent/set
       payload: "16"
   - alias: Set mode to Now (Fast charging)
     action: mqtt.publish
@@ -35,7 +45,7 @@ action:
       evaluate_payload: false
       qos: "1"
       retain: false
-      topic: evcc/loadpoints/1/mode/set
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/mode/set
       payload: now
   - delay:
       hours: 0
@@ -61,7 +71,7 @@ action:
       evaluate_payload: false
       qos: 0
       retain: false
-      topic: evcc/loadpoints/1/mode/set
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/mode/set
       payload: pv
 
 mode: single
