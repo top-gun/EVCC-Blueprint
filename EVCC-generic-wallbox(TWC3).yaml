@@ -2,7 +2,7 @@
 
 status: # charger status (A: not connected, B: connected, C: charging)
   source: mqtt
-  topic: ha-evcc/1/tesla-charge-status
+  topic: ha-evcc/1/tesla-charge-status2
   timeout: 60s
 enabled: # is charging enabled?
   source: mqtt
