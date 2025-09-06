@@ -76,7 +76,7 @@ action:
                 }}
             metadata: {}
             enabled: true
-           - alias: MQTT publish Tesla charge status 2 - like wallbox
+          - alias: MQTT publish Tesla charge status 2 - like a wallbox
             action: mqtt.publish
             data:
               qos: 1
@@ -84,10 +84,11 @@ action:
               topic: ha-evcc/{{ instance_number }}/tesla-charge-status2
               payload: >-
                 {{
-                {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"b","No Power":"b","Complete":"b","Error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)]
+                {"Disconnected":"a","Ready":"b","Charging":"c","Stopped":"b","No Power":"b","Complete":"c","Error":"f"}[states(device_entities(device_id) | select('match', '.*_charging_state$') | first)]
                 }}
             metadata: {}
             enabled: true
+
           - alias: MQTT publish Tesla odometer
             action: mqtt.publish
             data:
