@@ -170,6 +170,16 @@ action:
           - condition: template
             value_template: "{{ trigger.id == 'max_charge_requested' }}"
         sequence:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 5
+              milliseconds: 0
+          - action: number.set_value
+            data:
+              value: "{{ trigger.payload | int }}"
+            target:
+              entity_id: "{{ device_entities(device_id) | select('match', 'number.*_charging_amps$') | first }}"
           - action: number.set_value
             data:
               value: "{{ trigger.payload | int }}"
