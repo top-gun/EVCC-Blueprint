@@ -188,4 +188,6 @@ action:
 variables:
   device_id: !input tesla_device
   instance_number: !input instance_number
-mode: single
+mode: queued
+max: 10
+
