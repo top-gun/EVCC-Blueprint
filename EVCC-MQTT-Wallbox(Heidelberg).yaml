@@ -18,15 +18,15 @@ maxcurrent: # set maximum charge current in A
 
 ## optional attributes (read-only)
 
-power: # charge power in W
-  source: mqtt
-  topic: ha-evcc/1/wb-charge-power
-  timeout: 60s
+#power: # charge power in W
+#  source: mqtt
+#  topic: ha-evcc/1/wb-charge-power
+#  timeout: 60s
 
 energy: # meter reading in kWh
-  source: mqtt
-  topic: ha-evcc/1/wb-charge-energy
-  timeout: 60s
+#  source: mqtt
+#  topic: ha-evcc/1/wb-charge-energy
+#  timeout: 60s
 
 #identify: # current RFID identifier
 #  source: const
