@@ -5,18 +5,25 @@ blueprint:
   input:
     octopus_sensor:
       name: Octopus Energy Sensor
-      description: Select the Octopus Energy intelligent dispatching sensor
+      description: Select the Octopus Energy intelligent dispatching sensor (e.g., binary_sensor.octopus_a_38af7435_intelligent_dispatching)
       selector:
         entity:
           integration: octopus_germany
           domain: binary_sensor
-    evcc_device:
+    evcc_mode:
       name: evcc Device Mode
-      description: Select the evcc device mode entity
+      description: Select the evcc mode entity (e.g., select.evcc_heidelberg_mode) for setting modes like 'now' or 'pv'
       selector:
         entity:
-#          integration: evcc*
-          domain: selector
+          integration: evcc_intg
+          domain: select
+    evcc_max_current:
+      name: evcc Max Current
+      description: Select the evcc max current entity (e.g., select.evcc_heidelberg_max_current) for setting current like '16'
+      selector:
+        entity:
+          integration: evcc_intg
+          domain: select
 trigger:
   - platform: state
     entity_id: !input octopus_sensor
@@ -28,7 +35,7 @@ action:
     data:
       option: now
     target:
-      entity_id: !input evcc_device
+      entity_id: !input evcc_mode
   - delay:
       hours: 0
       minutes: 0
@@ -39,7 +46,7 @@ action:
     data:
       option: 16
     target:
-      entity_id: !input evcc_device
+      entity_id: !input evcc_max_current
   - wait_for_trigger:
       - platform: state
         entity_id: !input octopus_sensor
@@ -58,5 +65,5 @@ action:
     data:
       option: pv
     target:
-      entity_id: !input evcc_device
+      entity_id: !input evcc_mode
 mode: restart
