@@ -74,4 +74,4 @@ action:
       topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/mode/set
       payload: pv
 
-mode: single
+mode: restart
