@@ -1,75 +1,43 @@
-blueprint:
-  name: Octopus Charging with evcc Support
-  description: Automates charging using Octopus Energy intelligent dispatching and evcc mode control
-  domain: automation
-  input:
-    octopus_sensor:
-      name: Octopus Energy Sensor
-      description: Select the Octopus Energy intelligent dispatching sensor (e.g., binary_sensor.octopus_a_38af7435_intelligent_dispatching)
-      selector:
-        entity:
-          integration: octopus_germany
-          domain: binary_sensor
-    evcc_device:
-      name: evcc Device
-      description: Select the evcc device (e.g., evcc_heidelberg) that provides the mode and max current entities
-      selector:
-        device:
-          integration: evcc_intg
-    evcc_mode:
-      name: evcc Device Mode
-      description: Select the evcc mode entity for the chosen device, ending with '_mode' (e.g., select.evcc_heidelberg_mode) for setting modes like 'now' or 'pv'. Ensure it matches the selected device (e.g., 'evcc_heidelberg' for select.evcc_heidelberg_mode).
-      selector:
-        entity:
-          integration: evcc_intg
-          domain: select
-    evcc_max_current:
-      name: evcc Max Current
-      description: Select the evcc max current entity for the chosen device, ending with '_max_current' (e.g., select.evcc_heidelberg_max_current) for setting current like '16'. Ensure it matches the selected device (e.g., 'evcc_heidelberg' for select.evcc_heidelberg_max_current).
-      selector:
-        entity:
-          integration: evcc_intg
-          domain: select
-trigger:
-  - platform: state
-    entity_id: !input octopus_sensor
-    to: "on"
-condition: []
-action:
-  - action: select.select_option
-    metadata: {}
-    data:
-      option: now
-    target:
-      entity_id: !input evcc_mode
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 5
-      milliseconds: 0
-  - action: select.select_option
-    metadata: {}
-    data:
-      option: 16
-    target:
-      entity_id: !input evcc_max_current
-  - wait_for_trigger:
+automation:
+  - alias: Octopus Charging with evcc
+    description: Automates charging using Octopus Energy intelligent dispatching and evcc mode control
+    trigger:
       - platform: state
-        entity_id: !input octopus_sensor
-        to: "off"
-        for:
+        entity_id: binary_sensor.octopus_a_38af7435_intelligent_dispatching
+        to: "on"
+    condition: []
+    action:
+      - service: select.select_option
+        target:
+          entity_id: "{{ device_entities('evcc_heidelberg') | select('match', '.*_mode$') | first }}"
+        data:
+          option: now
+      - delay:
           hours: 0
           minutes: 0
           seconds: 5
-    timeout:
-      hours: 5
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
-  - action: select.select_option
-    metadata: {}
-    data:
-      option: pv
-    target:
-      entity_id: !input evcc_mode
-mode: restart
+          milliseconds: 0
+      - service: select.select_option
+        target:
+          entity_id: "{{ device_entities('evcc_heidelberg') | select('match', '.*_max_current$') | first }}"
+        data:
+          option: 16
+      - wait_for_trigger:
+          - platform: state
+            entity_id: binary_sensor.octopus_a_38af7435_intelligent_dispatching
+            to: "off"
+            for:
+              hours: 0
+              minutes: 0
+              seconds: 5
+        timeout:
+          hours: 5
+          minutes: 0
+          seconds: 0
+          milliseconds: 0
+      - service: select.select_option
+        target:
+          entity_id: "{{ device_entities('evcc_heidelberg') | select('match', '.*_mode$') | first }}"
+        data:
+          option: pv
+    mode: restart
