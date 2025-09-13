@@ -16,7 +16,7 @@ blueprint:
       selector:
         entity:
           integration: evcc
-          domain: select
+          domain: binary_sensor
 trigger:
   - platform: state
     entity_id: !input octopus_sensor
