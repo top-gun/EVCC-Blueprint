@@ -10,20 +10,28 @@ blueprint:
         entity:
           integration: octopus_germany
           domain: binary_sensor
+    evcc_device:
+      name: evcc Device
+      description: Select the evcc device (e.g., evcc_heidelberg) that provides the mode and max current entities
+      selector:
+        device:
+          integration: evcc_intg
     evcc_mode:
       name: evcc Device Mode
-      description: Select the evcc mode entity ending with '_mode' (e.g., select.evcc_heidelberg_mode) for setting modes like 'now' or 'pv'. Ensure you pick the entity ending with '_mode'.
+      description: Select the evcc mode entity ending with '_mode' (e.g., select.evcc_heidelberg_mode) for the chosen device, for setting modes like 'now' or 'pv'
       selector:
         entity:
           integration: evcc_intg
           domain: select
+          device: !input evcc_device
     evcc_max_current:
       name: evcc Max Current
-      description: Select the evcc max current entity ending with '_max_current' (e.g., select.evcc_heidelberg_max_current) for setting current like '16'. Ensure you pick the entity ending with '_max_current'.
+      description: Select the evcc max current entity ending with '_max_current' (e.g., select.evcc_heidelberg_max_current) for the chosen device, for setting current like '16'
       selector:
         entity:
           integration: evcc_intg
           domain: select
+          device: !input evcc_device
 trigger:
   - platform: state
     entity_id: !input octopus_sensor
