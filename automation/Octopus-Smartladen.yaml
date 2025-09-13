@@ -18,14 +18,14 @@ blueprint:
           integration: evcc_intg
     evcc_mode:
       name: evcc Device Mode
-      description: Select the evcc mode entity for the chosen device, which must end with '_mode' (e.g., select.evcc_heidelberg_mode) for setting modes like 'now' or 'pv'
+      description: Select the evcc mode entity for the chosen device, ending with '_mode' (e.g., select.evcc_heidelberg_mode) for setting modes like 'now' or 'pv'. Ensure it matches the selected device (e.g., 'evcc_heidelberg' for select.evcc_heidelberg_mode).
       selector:
         entity:
           integration: evcc_intg
           domain: select
     evcc_max_current:
       name: evcc Max Current
-      description: Select the evcc max current entity for the chosen device, which must end with '_max_current' (e.g., select.evcc_heidelberg_max_current) for setting current like '16'
+      description: Select the evcc max current entity for the chosen device, ending with '_max_current' (e.g., select.evcc_heidelberg_max_current) for setting current like '16'. Ensure it matches the selected device (e.g., 'evcc_heidelberg' for select.evcc_heidelberg_max_current).
       selector:
         entity:
           integration: evcc_intg
