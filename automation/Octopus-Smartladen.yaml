@@ -1,52 +1,57 @@
 blueprint:
-  name: Octopus Charging with evcc Support
-  description: Automates charging using Octopus Energy intelligent dispatching and evcc mode control
+  name: Octopus Charging - EVCC Support
+  description: Blueprint for automating EVCC charging with Octopus intelligent dispatching
   domain: automation
   input:
     octopus_sensor:
-      name: Octopus Energy Sensor
-      description: Select the Octopus Energy intelligent dispatching sensor (e.g., binary_sensor.octopus_a_38af7435_intelligent_dispatching)
+      name: Octopus Intelligent Dispatching Sensor
+      description: The binary sensor for Octopus intelligent dispatching
       selector:
         entity:
-          integration: octopus_germany
-          domain: binary_sensor
-    evcc_mode:
-      name: evcc Device Mode
-      description: Select the evcc mode entity (e.g., select.evcc_heidelberg_mode) for setting modes like 'now' or 'pv'
+          multiple: false
+          filter:
+            - integration: octopus_germany
+              domain: binary_sensor
+    loadpoint_number:
+      name: Ladepunkt Nummer
+      description: The loadpoint number for EVCC MQTT topics (e.g., 1 for loadpoints/1)
+      default: 1
       selector:
-        entity:
-          integration: evcc_intg
-          domain: select
-    evcc_max_current:
-      name: evcc Max Current
-      description: Select the evcc max current entity (e.g., select.evcc_heidelberg_max_current) for setting current like '16'
-      selector:
-        entity:
-          integration: evcc_intg
-          domain: select
+        number:
+          min: 1
+          max: 10
+          step: 1
+          mode: box
+
 trigger:
   - platform: state
     entity_id: !input octopus_sensor
     to: "on"
+
 condition: []
+
 action:
-  - action: select.select_option
-    metadata: {}
+  - alias: Set maximum charging current to 16A
+    action: mqtt.publish
     data:
-      option: now
-    target:
-      entity_id: !input evcc_mode
+      evaluate_payload: false
+      qos: "1"
+      retain: false
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/maxCurrent/set
+      payload: "16"
+  - alias: Set mode to Now (Fast charging)
+    action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: "1"
+      retain: false
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/mode/set
+      payload: now
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - action: select.select_option
-    metadata: {}
-    data:
-      option: 16
-    target:
-      entity_id: !input evcc_max_current
   - wait_for_trigger:
       - platform: state
         entity_id: !input octopus_sensor
@@ -60,10 +65,13 @@ action:
       minutes: 0
       seconds: 0
       milliseconds: 0
-  - action: select.select_option
-    metadata: {}
+  - alias: Set mode to PV
+    action: mqtt.publish
     data:
-      option: pv
-    target:
-      entity_id: !input evcc_mode
-mode: restart
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/mode/set
+      payload: pv
+
+mode: single
