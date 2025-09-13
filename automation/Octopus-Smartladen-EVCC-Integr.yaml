@@ -1,0 +1,62 @@
+alias: EVCC-Octopus-Test-EVCC-Integration
+description: ""
+trigger:
+  - platform: state
+    entity_id: !input trigger_entity
+    to: "on"
+condition: []
+action:
+  - service: select.select_option
+    target:
+      entity_id: !input target_select_1
+    data:
+      option: "16"
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: select.select_option
+    target:
+      entity_id: !input target_select_2
+    data:
+      option: "now"
+  - wait_for_trigger:
+      - platform: state
+        entity_id: !input trigger_entity
+        to: "off"
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 5
+    timeout:
+      hours: 5
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - service: select.select_option
+    target:
+      entity_id: !input target_select_2
+    data:
+      option: "pv"
+mode: single
+fields:
+  trigger_entity:
+    selector:
+      entity:
+        domain: binary_sensor
+        integration: octopus_germany
+  target_select_1:
+    selector:
+      entity:
+        domain: select
+        integration: evcc_intg
+        filter:
+          - entity_id: ".*_max_current$"
+  target_select_2:
+    selector:
+      entity:
+        domain: select
+        integration: evcc_intg
+        filter:
+          - entity_id: ".*_mode$"
