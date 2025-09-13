@@ -1,3 +1,34 @@
+blueprint:
+  name: EVCC-Octopus-Test-EVCC-Integration
+  description: Steuert ein Gerät der evcc_intg-Integration basierend auf einem Trigger von octopus_germany.
+  domain: automation
+  input:
+    trigger_entity:
+      name: Trigger-Sensor
+      description: Wähle den Binary-Sensor der octopus_germany-Integration, der die Automation triggert.
+      selector:
+        entity:
+          domain: binary_sensor
+          integration: octopus_germany
+    target_select_1:
+      name: Max Current Select
+      description: Wähle die select-Entität der evcc_intg-Integration, die auf '_max_current' endet.
+      selector:
+        entity:
+          domain: select
+          integration: evcc_intg
+          filter:
+            - entity_id: ".*_max_current$"
+    target_select_2:
+      name: Mode Select
+      description: Wähle die select-Entität der evcc_intg-Integration, die auf '_mode' endet.
+      selector:
+        entity:
+          domain: select
+          integration: evcc_intg
+          filter:
+            - entity_id: ".*_mode$"
+
 alias: EVCC-Octopus-Test-EVCC-Integration
 description: ""
 trigger:
@@ -40,23 +71,3 @@ action:
     data:
       option: "pv"
 mode: single
-fields:
-  trigger_entity:
-    selector:
-      entity:
-        domain: binary_sensor
-        integration: octopus_germany
-  target_select_1:
-    selector:
-      entity:
-        domain: select
-        integration: evcc_intg
-        filter:
-          - entity_id: ".*_max_current$"
-  target_select_2:
-    selector:
-      entity:
-        domain: select
-        integration: evcc_intg
-        filter:
-          - entity_id: ".*_mode$"
