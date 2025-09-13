@@ -15,7 +15,7 @@ blueprint:
       description: Select the evcc device mode entity
       selector:
         entity:
-          integration: evcc*
+#          integration: evcc*
           domain: binary_sensor
 trigger:
   - platform: state
