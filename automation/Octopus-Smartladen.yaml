@@ -4,14 +4,12 @@ blueprint:
   domain: automation
   input:
     octopus_sensor:
-      name: Octopus Intelligent Dispatching Sensor
-      description: The binary sensor for Octopus intelligent dispatching
+      name: Octopus Energy Sensor
+      description: Select the Octopus Energy intelligent dispatching sensor
       selector:
         entity:
-          multiple: false
-          filter:
-            - integration: octopus_germany
-              domain: binary_sensor
+          integration: octopus_germany
+          domain: binary_sensor
     evcc_device:
       name: evcc Device Mode
       description: Select the evcc device mode entity
