@@ -1,5 +1,5 @@
 blueprint:
-  name: EVCC Octopus Test Integration
+  name: EVCC Octopus Germany Integration
   description: Blueprint für die Octopus-Integration mit auswählbarem Sensor. Stellt sicher dass EVCC mit Ladevorgängen kooperiert die Octopus auslöst.
   domain: automation
   input:
