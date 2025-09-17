@@ -1,6 +1,6 @@
 blueprint:
   name: EVCC Octopus Germany Integration
-  description: Blueprint für die Octopus-Integration mit auswählbarem Sensor. Stellt sicher dass EVCC mit Ladevorgängen kooperiert die Octopus auslöst.
+  description: Blueprint für die Octopus-Integration mit auswählbarem Sensor und Gerät. Stellt sicher, dass EVCC mit Ladevorgängen kooperiert, die Octopus auslöst.
   domain: automation
   input:
     octopus_sensor:
@@ -10,13 +10,19 @@ blueprint:
         entity:
           domain: binary_sensor
           integration: octopus_germany
+    evcc_device:
+      name: EVCC Gerät
+      description: Wählen Sie das Gerät aus, das von der evcc_intg Integration bereitgestellt wird.
+      selector:
+        device:
+          integration: evcc_intg
 trigger:
   - platform: state
     entity_id: !input octopus_sensor
     to: "on"
 condition: []
 action:
-  - device_id: cc674e67e3d095e4b92ccb5ca609e6f9
+  - device_id: !input evcc_device
     domain: select
     entity_id: 990b75ec11c14f42a593cc7464f4afe7
     type: select_option
@@ -26,7 +32,7 @@ action:
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - device_id: cc674e67e3d095e4b92ccb5ca609e6f9
+  - device_id: !input evcc_device
     domain: select
     entity_id: aa2b6c2cce923edce6aee2dae73456c4
     type: select_option
@@ -44,7 +50,7 @@ action:
       minutes: 0
       seconds: 0
       milliseconds: 0
-  - device_id: cc674e67e3d095e4b92ccb5ca609e6f9
+  - device_id: !input evcc_device
     domain: select
     entity_id: aa2b6c2cce923edce6aee2dae73456c4
     type: select_option
