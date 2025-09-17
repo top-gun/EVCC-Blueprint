@@ -15,11 +15,7 @@ blueprint:
       description: Wählen Sie das Gerät aus, dessen Name auf "solar charging [evcc]" endet.
       selector:
         device:
-          filter:
-          - integration: evcc_intg
-          entity:
-            - domain: sensor
-              device_class: battery
+          integration: evcc_intg
 trigger:
   - platform: state
     entity_id: !input octopus_sensor
