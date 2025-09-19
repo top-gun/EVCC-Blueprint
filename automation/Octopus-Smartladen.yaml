@@ -1,42 +1,57 @@
 blueprint:
-  name: EVCC Octopus Germany Integration
-  description: Blueprint für die Octopus-Integration mit auswählbarem Sensor und Gerät. Stellt sicher, dass EVCC mit Ladevorgängen kooperiert, die Octopus auslöst.
+  name: Octopus Charging - EVCC Support
+  description: Blueprint for automating EVCC charging with Octopus intelligent dispatching
   domain: automation
   input:
     octopus_sensor:
       name: Octopus Intelligent Dispatching Sensor
-      description: Wählen Sie den binary_sensor aus, der von der octopus_germany Integration bereitgestellt wird.
+      description: The binary sensor for Octopus intelligent dispatching
       selector:
         entity:
-          domain: binary_sensor
-          integration: octopus_germany
-    evcc_device:
-      name: EVCC Gerät
-      description: Wählen Sie das Gerät aus, dessen Name auf "solar charging [evcc]" endet.
+          multiple: false
+          filter:
+            - integration: octopus_germany
+              domain: binary_sensor
+    loadpoint_number:
+      name: Ladepunkt Nummer
+      description: The loadpoint number for EVCC MQTT topics (e.g., 1 for loadpoints/1)
+      default: 1
       selector:
-        device:
-          integration: evcc_intg
+        number:
+          min: 1
+          max: 10
+          step: 1
+          mode: box
+
 trigger:
   - platform: state
     entity_id: !input octopus_sensor
     to: "on"
+
 condition: []
+
 action:
-  - device_id: !input evcc_device
-    domain: select
-    entity_id: 990b75ec11c14f42a593cc7464f4afe7
-    type: select_option
-    option: "16"
+  - alias: Set maximum charging current to 16A
+    action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: "1"
+      retain: false
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/maxCurrent/set
+      payload: "16"
+  - alias: Set mode to Now (Fast charging)
+    action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: "1"
+      retain: false
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/mode/set
+      payload: now
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - device_id: !input evcc_device
-    domain: select
-    entity_id: aa2b6c2cce923edce6aee2dae73456c4
-    type: select_option
-    option: now
   - wait_for_trigger:
       - platform: state
         entity_id: !input octopus_sensor
@@ -50,9 +65,13 @@ action:
       minutes: 0
       seconds: 0
       milliseconds: 0
-  - device_id: !input evcc_device
-    domain: select
-    entity_id: aa2b6c2cce923edce6aee2dae73456c4
-    type: select_option
-    option: pv
+  - alias: Set mode to PV
+    action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: evcc/loadpoints/{{ inputs.loadpoint_number }}/mode/set
+      payload: pv
+
 mode: single
