@@ -1,3 +1,35 @@
+blueprint:
+  name: Octopus Charging - EVCC Support
+  description: Blueprint for automating EVCC charging with Octopus intelligent dispatching
+  domain: automation
+  input:
+    octopus_sensor:
+      name: Octopus Intelligent Dispatching Sensor
+      description: The binary sensor for Octopus intelligent dispatching
+      selector:
+        entity:
+          multiple: false
+          filter:
+            - integration: octopus_germany
+              domain: binary_sensor
+    loadpoint_number:
+      name: Ladepunkt Nummer
+      description: The loadpoint number for EVCC MQTT topics (e.g., 1 for loadpoints/1)
+      default: 1
+      selector:
+        number:
+          min: 1
+          max: 10
+          step: 1
+          mode: box
+
+trigger:
+  - platform: state
+    entity_id: !input octopus_sensor
+    to: "on"
+
+condition: []
+
 action:
   - alias: Set maximum charging current to 16A
     action: mqtt.publish
@@ -41,3 +73,5 @@ action:
       retain: false
       topic: evcc/loadpoints/{{ loadpoint_number }}/mode/set
       payload: pv
+
+mode: single
