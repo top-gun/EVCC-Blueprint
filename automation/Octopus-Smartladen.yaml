@@ -14,7 +14,7 @@ blueprint:
               domain: binary_sensor
     instance_number:
       name: Instance Number
-      description: The number to use in MQTT topic paths (e.g., ha-evcc/<number>/...).
+      description: Gib die Nummer des Ladepunktes an (bei mehreren) (z.B., evcc/loadpoints/<Nummer>/...).
       selector:
         text:
           type: text
