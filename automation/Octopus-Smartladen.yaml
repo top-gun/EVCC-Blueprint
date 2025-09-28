@@ -12,6 +12,13 @@ blueprint:
           filter:
             - integration: octopus_germany
               domain: binary_sensor
+    instance_number:
+      name: Instance Number
+      description: The number to use in MQTT topic paths (e.g., ha-evcc/<number>/...).
+      selector:
+        text:
+          type: text
+      default: "1"
 
 trigger:
   - platform: state
