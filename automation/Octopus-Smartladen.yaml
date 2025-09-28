@@ -13,7 +13,7 @@ blueprint:
             - integration: octopus_germany
               domain: binary_sensor
     instance_number:
-      name: Instance Number
+      name: Ladepunkt Nummer
       description: Gib die Nummer des Ladepunktes an (bei mehreren) (z.B., evcc/loadpoints/<Nummer>/...).
       selector:
         text:
