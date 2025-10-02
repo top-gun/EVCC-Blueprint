@@ -54,7 +54,7 @@ action:
               qos: 0
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-soc-limit
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_limit$') | first)|int }}"
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_limit$') | first)|int(0) }}"
             metadata: {}
           - alias: MQTT publish Tesla range
             action: mqtt.publish
@@ -62,7 +62,7 @@ action:
               qos: 1
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-range
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_range$') | first)|int }}"
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_range$') | first)|int(0) }}"
             metadata: {}
           - alias: MQTT publish Tesla charge status
             action: mqtt.publish
@@ -95,7 +95,7 @@ action:
               qos: 0
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-odometer
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_odometer$') | first)|int }}"
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_odometer$') | first)|int(0) }}"
             metadata: {}
           - alias: MQTT publish Tesla finish time
             action: mqtt.publish
@@ -104,7 +104,7 @@ action:
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-finishtime
               payload: >
-                {% set ts = now().utcnow() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int) %}
+                {% set ts = now().utcnow() + timedelta(minutes=states(device_entities(device_id) | select('match', '.*_minutes_to_limit$') | first)|int(0) ) %}
                 {{ ts.strftime("%Y-%m-%dT%H:%M:%SZ") }}
             metadata: {}
           - alias: MQTT publish Tesla SOC
@@ -113,7 +113,7 @@ action:
               qos: 1
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-soc
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float }}"
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_level$') | first)|float(0) }}"
             metadata: {}
           - alias: MQTT publish Tesla Charger State
             action: mqtt.publish
@@ -129,7 +129,7 @@ action:
               qos: 1
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-charge-power
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_power$') | first)|int*1000 }}"
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_power$') | first)|int(0) *1000 }}"
             metadata: {}
           - alias: MQTT publish Tesla energy added
             action: mqtt.publish
@@ -137,7 +137,7 @@ action:
               qos: 1
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-energy-added
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_energy_added$') | first)|float }}"
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_energy_added$') | first)|float(0) }}"
             metadata: {}
           - alias: MQTT publish Tesla charge current
             action: mqtt.publish
@@ -145,7 +145,7 @@ action:
               qos: 1
               retain: false
               topic: ha-evcc/{{ instance_number }}/tesla-charge-current
-              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_current$') | first)|float }}"
+              payload: "{{ states(device_entities(device_id) | select('match', '.*_charge_current$') | first)|float(0) }}"
             metadata: {}
       - conditions:
           - condition: template
