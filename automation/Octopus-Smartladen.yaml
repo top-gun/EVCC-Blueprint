@@ -34,7 +34,7 @@ action:
       evaluate_payload: false
       qos: "1"
       retain: false
-      topic: evcc/loadpoints/{{ instance_number }}/maxCurrent/set
+      topic: evcc/loadpoints/1/maxCurrent/set
       payload: "16"
   - alias: Set mode to Now (Fast charging)
     action: mqtt.publish
@@ -42,7 +42,7 @@ action:
       evaluate_payload: false
       qos: "1"
       retain: false
-      topic: evcc/loadpoints/{{ instance_number }}/mode/set
+      topic: evcc/loadpoints/1/mode/set
       payload: now
   - delay:
       hours: 0
@@ -68,7 +68,7 @@ action:
       evaluate_payload: false
       qos: 0
       retain: false
-      topic: evcc/loadpoints/{{ instance_number }}/mode/set
+      topic: evcc/loadpoints/1/mode/set
       payload: pv
 
 mode: single
