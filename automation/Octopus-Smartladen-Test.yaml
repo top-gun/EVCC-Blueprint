@@ -1,0 +1,83 @@
+blueprint:
+  name: Octopus Charging - Test
+  description: Blueprint for automating EVCC charging with Octopus intelligent dispatching
+  domain: automation
+  input:
+    octopus_sensor:
+      name: Octopus Intelligent Dispatching Sensor
+      description: Wähle deine Entität für Octopus intelligent dispatching
+      selector:
+        entity:
+          multiple: false
+          filter:
+            - integration: octopus_germany
+              domain: binary_sensor
+    instance_number:
+      name: Ladepunkt Nummer
+      description: Wähle 1, Ausnahmen nur bei mehreren Ladepunkten. 
+      selector:
+        select:
+          options:
+            - "1"
+            - "2"
+            - "3"
+            - "4"
+            
+trigger:
+  - platform: state
+    entity_id: !input octopus_sensor
+    to: "on"
+  - platform: state
+    entity_id: input_boolean.octopus_test
+    to: "on"
+
+condition: []
+
+action:
+  - variables: 
+      Ladepunkt_raw: !input instance_number  # Erste Variable: Holt den Input-Wert (oder none bei leer)
+      Ladepunkt: "{{ Ladepunkt_raw | default(1) | int(1) }}"
+  - alias: Set maximum charging current to 16A
+    action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: "1"
+      retain: false
+      topic: evcc/loadpoints/{{ Ladepunkt }}/maxCurrent/set
+      payload: "16"
+  - alias: Set mode to Now (Fast charging)
+    action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: "1"
+      retain: false
+      topic: evcc/loadpoints/{{ Ladepunkt }}/mode/set
+      payload: now
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - wait_for_trigger:
+      - platform: state
+        entity_id: !input octopus_sensor
+        to: "off"
+        for:
+          hours: 0
+          minutes: 0
+          seconds: 5
+    timeout:
+      hours: 5
+      minutes: 0
+      seconds: 0
+      milliseconds: 0
+  - alias: Set mode to PV
+    action: mqtt.publish
+    data:
+      evaluate_payload: false
+      qos: 0
+      retain: false
+      topic: evcc/loadpoints/{{ Ladepunkt }}/mode/set
+      payload: pv
+
+mode: single
