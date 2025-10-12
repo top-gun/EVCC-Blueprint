@@ -40,6 +40,9 @@ finishtime: # finish time (RFC3339)
 
 ## optional attributes (writeable)
 
+# welcomecharge is useful if you use Octopus intelligent charging. It opens the wallcharger for a minute.
+# features: ["welcomecharge"]
+
 #wakeup: # wake up vehicle
 #    source: js
 #    script: console.log(wakeup);
