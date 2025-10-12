@@ -40,7 +40,8 @@ finishtime: # finish time (RFC3339)
 
 ## optional attributes (writeable)
 
-# features: ["welcomecharge"]  # uncomment welcomecharge if you use intelligend Octopus tarriffs.
+# activate welcomecharge if you use intelligent Octopus tarriffs.
+# features: ["welcomecharge"]  
 
 #wakeup: # wake up vehicle
 #    source: js
