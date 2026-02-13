@@ -155,17 +155,33 @@ action:
               - condition: template
                 value_template: "{{ trigger.payload | bool }}"
             then:
-              - action: switch.turn_on
-                metadata: {}
-                data: {}
-                target:
-                  entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first }}"
+              - if:
+                  - condition: template
+                    value_template: >
+                      {{ states(device_entities(device_id) | select('match',
+                      '.*_charging_state$') | first) != 'Complete' }}
+                then:
+                  - action: switch.turn_on
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: >-
+                        {{ device_entities(device_id) | select('match',
+                        'switch.*_charger$') | first }}
             else:
-              - action: switch.turn_off
-                metadata: {}
-                data: {}
-                target:
-                  entity_id: "{{ device_entities(device_id) | select('match', 'switch.*_charger$') | first }}"
+              - if:
+                  - condition: template
+                    value_template: >
+                      {{ states(device_entities(device_id) | select('match',
+                      '.*_charging_state$') | first) == 'Charging' }}
+                then:
+                  - action: switch.turn_off
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: >-
+                        {{ device_entities(device_id) | select('match',
+                        'switch.*_charger$') | first }}
       - conditions:
           - condition: template
             value_template: "{{ trigger.id == 'max_charge_requested' }}"
