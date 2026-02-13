@@ -154,6 +154,10 @@ action:
           - if:
               - condition: template
                 value_template: "{{ trigger.payload | bool }}"
+              - condition: template
+                value_template: >
+                  {{ states(device_entities(device_id) | select('match',
+                  '.*_charging_state$') | first) != 'Complete' }}
             then:
               - action: switch.turn_on
                 metadata: {}
