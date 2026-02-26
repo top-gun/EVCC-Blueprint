@@ -52,4 +52,4 @@ finishtime: # finish time (RFC3339)
 #  timeout: 60s
 maxcurrent: # set max charge current
   source: mqtt
-  topic: ha-evcc/1/tesla-charge-current
+  topic: ha-evcc/1/tesla-charge-current-requested
