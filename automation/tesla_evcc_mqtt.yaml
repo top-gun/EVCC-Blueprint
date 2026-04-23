@@ -191,22 +191,22 @@ action:
               minutes: 0
               seconds: 5
               milliseconds: 0
-              - if:
-                  - condition: template
-                    value_template: >
-                      {{ states(device_entities(device_id) | select('match',
-                      '.*_charging_state$') | first) != 'Complete' }}
-                then:
-                  - action: number.set_value
-                    data:
-                      value: "{{ trigger.payload | int }}"
-                    target:
-                      entity_id: "{{ device_entities(device_id) | select('match', 'number.*_charging_amps$') | first }}"
-                  - action: number.set_value
-                    data:
-                      value: "{{ trigger.payload | int }}"
-                    target:
-                      entity_id: "{{ device_entities(device_id) | select('match', 'number.*_charging_amps$') | first }}"
+            - if:
+                - condition: template
+                  value_template: >
+                    {{ states(device_entities(device_id) | select('match',
+                    '.*_charging_state$') | first) != 'Complete' }}
+              then:
+                - action: number.set_value
+                  data:
+                    value: "{{ trigger.payload | int }}"
+                  target:
+                    entity_id: "{{ device_entities(device_id) | select('match', 'number.*_charging_amps$') | first }}"
+                - action: number.set_value
+                  data:
+                    value: "{{ trigger.payload | int }}"
+                  target:
+                    entity_id: "{{ device_entities(device_id) | select('match', 'number.*_charging_amps$') | first }}"
 variables:
   device_id: !input tesla_device
   instance_number: !input instance_number
